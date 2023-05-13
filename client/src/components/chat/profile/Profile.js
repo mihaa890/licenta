@@ -74,10 +74,12 @@ const Profile = () => {
         const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/users/${id}`);
         const data = await response.json();
         setUser(data);
-        if (data.profilePictureHash) {
-          const profileImage = `https://cloudflare-ipfs.com/ipfs/${data.profilePictureHash}`;
-          setImageSrc(profileImage);
-        }
+
+        setImageSrc(
+          data?.profilePictureHash
+            ? `https://cloudflare-ipfs.com/ipfs/${data.profilePictureHash}`
+            : defaultUserImage
+        );
       } catch (error) {
         console.error(error);
       }
@@ -102,10 +104,9 @@ const Profile = () => {
       {success && (
         <Alert sx={{
           position: "absolute",
-          bottom: 0,
-          right: "0",
-          transform: "translateY(calc(100% - 1px))",
-          maxWidth: "500px",
+          bottom: "2px",
+          right: "10px",
+          width: "350px",
           borderRadius: "0",
         }}
           onClose={() => setSuccess(false)}>

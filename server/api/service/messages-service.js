@@ -1,5 +1,6 @@
 const { User } = require('../dto/users');
 const { ipfs } = require('../service/user-service');
+const { v4: uuidv4 } = require('uuid');
 
 const io = require('socket.io')({
     cors: {
@@ -39,12 +40,12 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on("fileSentSuccessfully" , async (data) => {
+    socket.on("fileSentSuccessfully", async (data) => {
         io.to(data.senderId).emit('fileSentSuccessfully', { status: 'success', message: 'File sent successfully.' });
     })
 
 
-    socket.on("sendFile", async (data) => {
+    socket.on("sendFile", async (data, onSuccess) => {
         const { senderId, receiverId, file } = data;
 
         const fileType = file.type;
@@ -71,30 +72,50 @@ io.on('connection', (socket) => {
             io.to(receiver.socket_id).emit('sendFile', { senderId, file: { type: fileType, hash: fileHash, filename: file.filename } });
             io.to(senderId).emit('fileSentSuccessfully', { status: 'success', message: 'File sent successfully.' });
         }
+        onSuccess(fileHash);
 
     });
 
 
     socket.emit("me", socket.id)
 
-    socket.on("callUser", async (data, senderId, receiverId ) => {
-        console.log("CALL USER",  senderId, receiverId)
-        io.to(data.userToCall).emit("callUser", { signal: data.signalData, from: data.from, name: data.name }, senderId, receiverId)
-
+    socket.on("callUser", async (data, senderId, receiverId) => {
         const sender = await User.findById(senderId);
         const receiver = await User.findById(receiverId);
 
-        await User.findByIdAndUpdate(senderId, {
-            $push: { calls: { senderId: senderId, senderUsername : sender.username,  receiverId: receiverId, receiverUsername : receiver.username,  callType: data.callType, answer: data.answer,  timestamp: Date.now() } }
-        });
+        const callEvent = {
+            uuid: uuidv4(),
+            senderId: senderId,
+            senderUsername: sender.username,
+            receiverId: receiverId,
+            receiverUsername: receiver.username,
+            answer: false,
+            callType: data.callType,
+            timestamp: Date.now()
+        }
 
-        await User.findByIdAndUpdate(receiverId, {
-            $push: { calls: { senderId: senderId, senderUsername : sender.username,  receiverId: receiverId, receiverUsername : receiver.username, callType: data.callType,answer: data.answer,  timestamp: Date.now() } }
-        });
+        await User.findByIdAndUpdate(senderId, { $push: { calls: callEvent } });
+        await User.findByIdAndUpdate(receiverId, { $push: { calls: callEvent } });
 
+        io.to(data.userToCall).emit("callUser", { signal: data.signalData, from: data.from, name: data.name, callEvent }, senderId, receiverId)
     });
 
-    socket.on("answerCall", (data) => {
+    socket.on("answerCall", async (data) => {
+        console.log(`${data.callReceiver} is answering to ${data.callSender} through ${data.callUuid}`)
+
+        const sender = await User.findOne({ socket_id: data.callSender });
+        const receiver = await User.findOne({ socket_id: data.callReceiver });
+        
+        await User.findOneAndUpdate(
+            { _id: sender._id, "calls.uuid": data.callUuid },
+            { $set: { "calls.$.answer": true } }
+        );
+
+        await User.findOneAndUpdate(
+            { _id: receiver._id, "calls.uuid": data.callUuid },
+            { $set: { "calls.$.answer": true } }
+        );
+
         io.to(data.to).emit("callAccepted", data.signal)
     })
 
@@ -132,6 +153,7 @@ const _getAllCalls = async (req, res) => {
 
     const _user = await User.findById(userId);
     const calls = _user.calls;
+
 
     return calls;
 

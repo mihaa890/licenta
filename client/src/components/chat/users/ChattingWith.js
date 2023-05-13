@@ -1,18 +1,21 @@
 import React, { Fragment, useMemo, useRef } from 'react';
-import { Avatar, Box, Button, Fab, IconButton, Modal, TextField, Typography } from '@mui/material';
+import { Avatar, Box, Button, Fab, IconButton, Modal } from '@mui/material';
 import { IoCallOutline } from 'react-icons/io5'
 import { BsCameraVideo } from 'react-icons/bs'
 import { BiDotsVerticalRounded } from 'react-icons/bi'
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { useChatContext } from '../ChatContextProvider.';
-import { ChatInput } from './Chats.style';
+import { AnimationContainer, ChatInput } from './Chats.style';
 import { IoIosAttach } from 'react-icons/io'
 import EmojiPicker from 'emoji-picker-react';
 import { GrEmoji } from 'react-icons/gr'
 import Draggable from 'react-draggable';
 import moment from 'moment';
 import { cid as isCid } from "is-ipfs"
+import fileTransferAnimation from "../../../assets/animations/file-transfer.json"
+import Animation from "../../reusable/Animation";
+
 
 const ChattingWith = ({ friend }) => {
     const { socket, senderId, initVideoCall } = useChatContext();
@@ -60,7 +63,13 @@ const ChattingWith = ({ friend }) => {
 
         if (socket) {
             socket?.on('message', (data) => {
-                setMyMessages((prevMessages) => [...prevMessages, { senderId: data.senderId, message: data.message }]);
+                setMyMessages((prevMessages) => [
+                    ...prevMessages, 
+                    { senderId: 
+                        data.senderId, 
+                        message: data.message,
+                        timestamp: Date.now()
+                    }]);
             });
 
         }
@@ -78,7 +87,15 @@ const ChattingWith = ({ friend }) => {
 
             socket?.emit('message', data);
 
-            setMyMessages((prevMessages) => [...prevMessages, { senderId: data.senderId, message: data.message }]);
+            setMyMessages((prevMessages) => [
+                ...prevMessages, 
+                { 
+                    senderId: data.senderId, 
+                    message: data.message, 
+                    timestamp: Date.now()
+                }
+            ]);
+
             setCurrentMessage('');
         }
     };
@@ -115,17 +132,21 @@ const ChattingWith = ({ friend }) => {
                     data: reader.result.split(',')[1],
                     filename: file.name
                 },
-            });
+            }, (fileHash) => {
+                setLoading(false);
+                setMyMessages((prevMessages) => [
+                    ...prevMessages, {
+                        senderId: senderId,
+                        message: {
+                            filename: file.name,
+                            hash: fileHash,
+                            type: fileType,
+                        }
+                    }
+                ]);
+            }
+            );
             setOpenModal(false);
-
-            socket?.emit('fileSentSuccessfully', (data) => {
-                if (data.status === 'success') {
-                    setLoading(false);
-                    console.log(data.message);
-                } else {
-                    console.error('Error occurred during file transfer:', data.message);
-                }
-            });
 
         };
         reader.readAsDataURL(file);
@@ -147,7 +168,7 @@ const ChattingWith = ({ friend }) => {
 
     const groupMessagesByDay = (messages) => {
         const groupedMessages = messages.reduce((grouped, message) => {
-            const date = new Date(message.timestamp).toLocaleDateString();
+            const date = new Date(message.timestamp).toLocaleDateString('en-US');
             if (!grouped[date]) {
                 grouped[date] = [];
             }
@@ -212,7 +233,7 @@ const ChattingWith = ({ friend }) => {
 
     return (
         loading
-            ? <div className="loader">Loading.....</div>
+            ? <AnimationContainer><Animation animation={fileTransferAnimation} id={'file-transfer-animation'} /></AnimationContainer>
             : <div
                 style={{
                     position: 'relative',
@@ -345,13 +366,13 @@ const ChattingWith = ({ friend }) => {
 
 
                                         // Check if the message is an image
-                                        if (isCid(message.message.hash) && message.message.type === 'image') {
+                                        if (isCid(message?.message?.hash) && message?.message?.type === 'image') {
                                             content = <img style={{ maxWidth: '300px' }} src={`https://cloudflare-ipfs.com/ipfs/${message.message.hash}`} alt="image" />;
                                             isImage = true;
-                                        } else if (isCid(message.message.hash) && message.message.type !== 'image') {
+                                        } else if (isCid(message?.message?.hash) && message.message.type !== 'image') {
                                             const fileExtension = message.message.type
                                             if (fileExtension) {
-                                                content = message.message.hash;
+                                                content = message?.message?.hash;
                                                 isFile = true;
                                             }
                                         }
@@ -383,7 +404,7 @@ const ChattingWith = ({ friend }) => {
                                                             color: '#fff',
 
                                                         }}
-
+                                                            target="_blank"
                                                             href={`https://cloudflare-ipfs.com/ipfs/${message.message.hash}`} download>
                                                             {message.message.filename}
                                                         </a>

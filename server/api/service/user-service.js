@@ -67,13 +67,12 @@ const _setUserProfilePicture = async (id, file) => {
 
         const _file = await ipfs.add(buffer);
         const profilePictureHash = _file.cid.toString();
+        const user = await User.findByIdAndUpdate(id, { profilePictureHash });
 
-        const user = await User.findOneAndUpdate(
-            { _id: id },
-            { profilePictureHash: profilePictureHash }
-        );
-
-        return user;
+        return {
+            ...user,
+            profilePictureHash
+        };
     } catch (error) {
         console.error(error);
     }

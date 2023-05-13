@@ -23,9 +23,9 @@ import {
     TableRow,
     Paper,
     IconButton,
+    CircularProgress,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import noRequests from "../../../assets/animations/no-requests.json"
@@ -39,12 +39,17 @@ const STATUS = {
 
 const Users = () => {
     const [allUsers, setAllUsers] = useState([]);
-    const [myRequests, setMyRequests] = useState([]);
     const [userDetails, setUserDetails] = useState(null);
+    const [friendRequestsSent, setFriendRequestsSent] = useState([]);
+    const [friendRequestsReceived, setFriendRequestsReceived] = useState([]);
+
+    const [loading, setLoading] = useState(false);
+    const [friendDetails, setFriendDetails] = useState(null);
     const [pageMyRequests, setPageMyRequests] = useState(1);
     const [pages, setTotalPages] = useState(1);
     const [page, setPage] = useState(1);
     const { id } = useParams();
+
 
     const handleGetAllUsers = async (page, limit) => {
         const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/users?page=${page}&limit=${limit}`);
@@ -58,8 +63,6 @@ const Users = () => {
             })
         );
 
-        console.log(users)
-
         setAllUsers(usersWithProfilePicture);
         setTotalPages(pagination.totalPages);
         setPage(page);
@@ -67,52 +70,68 @@ const Users = () => {
 
 
     const handleAddFriend = async (userId, friendId) => {
-        const response = await fetch(
-            `${process.env.REACT_APP_BASE_URL}/api/friends/${userId}`,
-            {
-                method: "POST",
-                body: JSON.stringify({ friendId }),
+        try {
+            setLoading(true);
+            const response = await fetch(
+                `${process.env.REACT_APP_BASE_URL}/api/friends/${userId}`,
+                {
+                    method: "POST",
+                    body: JSON.stringify({ friendId }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.ok) {
+                const updatedUser = await response.json();
+                setAllUsers((prevUsers) =>
+                    prevUsers.map((user) =>
+                        user._id === updatedUser._id ? updatedUser : user
+                    )
+                );
+                setLoading(false);
+                await getMyRequests();
+                return updatedUser;
+            } else {
+                console.error(response.error);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+
+    const handleAcceptOrRejectFriendRequest = async (friendRequestId, status) => {
+        try {
+            setLoading(true);
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/friends/${id}`, {
+                method: "PUT",
+                body: JSON.stringify({ friendId: friendRequestId, status }),
                 headers: {
                     "Content-Type": "application/json",
                 },
+            });
+
+            if (response.ok) {
+                await getMyRequests();
+            } else {
+                console.log("Error:", response.statusText);
             }
-        );
-
-        if (response.ok) {
-            const updatedUser = await response.json();
-            setAllUsers((prevUsers) =>
-                prevUsers.map((user) =>
-                    user._id === updatedUser._id ? updatedUser : user
-                )
-            );
-            return updatedUser;
-        } else {
-            console.error(response.error);
+            setLoading(false);
+        } catch (error) {
+            console.error(error);
         }
     };
 
-    const handleAcceptOrRejectFriendRequest = async (friendRequestId, status) => {
-
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/friends/${id}`, {
-            method: "POST",
-            body: JSON.stringify({ friendId: friendRequestId, status }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-
-        if (response.ok) {
-            const friend = await response.json();
-            console.log(friend);
-        } else {
-            console.log("Error:", response.statusText);
-        }
-    };
 
     const getMyRequests = async () => {
         const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/friends/requests/${id}`);
         const data = await response.json();
-        setMyRequests(data);
+        console.log(data)
+
+        setFriendRequestsReceived(data.requestsThatIHaveReceived);
+        setFriendRequestsSent(data.requestsThatIHaveSent);
     };
 
     useEffect(() => {
@@ -143,6 +162,7 @@ const Users = () => {
                         fontSize: "20px",
                     }}
                 >
+
                     {user?.username.charAt(0)}
                 </span>
             </Box>
@@ -155,8 +175,6 @@ const Users = () => {
     const handleUserDetailsModalClose = () => {
         setUserDetails(null);
     };
-
-    console.log({ myRequests })
 
     return (
         <Grid container spacing={2}>
@@ -182,24 +200,22 @@ const Users = () => {
                                             </IconButton>
                                         </ListItemAvatar>
                                         <ListItemText primary={user.username} />
-                                        {/* <Button
+                                        <Button
+                                            disabled={user._id === id}
                                             variant="contained"
-                                            color={
-                                                myRequests.find(
-                                                    ({ friend }) => friend._id === user._id
-                                                )
-                                                    ? "secondary"
-                                                    : "primary"
-                                            }
+                                            color="primary"
                                             style={{ textTransform: "capitalize" }}
                                             onClick={() => handleAddFriend(id, user._id)}
                                         >
-                                            {myRequests.find(
-                                                ({ friend }) => friend._id === user._id
-                                            )
-                                                ? "Pending"
-                                                : "Add Friend"}
-                                        </Button> */}
+                                            {loading ? (
+                                                <CircularProgress size={24} color="inherit" />
+                                            ) : friendRequestsSent.find((request) => request.friendId === user._id) ? (
+                                                <span>Pending</span>
+                                            ) : (
+                                                <span>Add Friend</span>
+                                            )}
+                                        </Button>
+
                                     </ListItem>
                                 );
                             })}
@@ -208,18 +224,18 @@ const Users = () => {
                         <Typography variant="body1">There are no users to display.</Typography>
                     )}
                     <Stack spacing={2}>
-                        <Pagination
+                        {pages > 1 && <Pagination
                             count={pages}
                             page={page}
                             onChange={(event, value) => handleGetAllUsers(value)}
-                        />
+                        />}
                     </Stack>
                 </div>
             </Grid>
             <Grid item xs={12} md={6}>
                 <Typography variant="h6">My Friend Requests</Typography>
                 <div>
-                    {myRequests.length !== 0 ? (
+                    {friendRequestsReceived.length !== 0 ? (
                         <TableContainer component={Paper} sx={{
                             maxHeight: "400px",
                             overflowY: "scroll",
@@ -230,17 +246,16 @@ const Users = () => {
                                         <TableCell>User</TableCell>
                                         <TableCell sx={{
                                             textAlign: "center"
-
                                         }}>Action</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {myRequests && myRequests.map((friendRequest) => {
+                                    {friendRequestsReceived.map((friendRequest) => {
                                         return (
-                                            <TableRow key={friendRequest._id}>
+                                            <TableRow key={`${friendRequest.requestId}-key`}>
                                                 <TableCell component="th" scope="row">
                                                     <IconButton onClick={() => handleUserDetailsModalOpen(friendRequest)}>
-                                                        {friendRequest?.profilePictureHash ? (
+                                                        {friendRequest.profilePictureHash ? (
                                                             <Avatar sx={{
                                                                 width: "50px",
                                                                 height: "50px",
@@ -249,36 +264,39 @@ const Users = () => {
                                                             defaultUserIcon(friendRequest)
                                                         )}
                                                     </IconButton>
-                                                    {friendRequest?.username}
+                                                    {friendRequest.username}
                                                 </TableCell>
                                                 <TableCell sx={{
                                                     textAlign: "center"
-
                                                 }}>
-                                                    <ButtonGroup variant="text">
-                                                        <Button
-                                                            color="primary"
-                                                            onClick={() =>
-                                                                handleAcceptOrRejectFriendRequest(
-                                                                    friendRequest._id,
-                                                                    STATUS.ACCEPTED
-                                                                )
-                                                            }
-                                                        >
-                                                            Accept
-                                                        </Button>
-                                                        <Button
-                                                            color="secondary"
-                                                            onClick={() =>
-                                                                handleAcceptOrRejectFriendRequest(
-                                                                    friendRequest?._id,
-                                                                    STATUS.REJECTED
-                                                                )
-                                                            }
-                                                        >
-                                                            Reject
-                                                        </Button>
-                                                    </ButtonGroup>
+                                                    {loading ? (
+                                                        <CircularProgress size={24} color="inherit" />
+                                                    ) : (
+                                                        <ButtonGroup variant="text">
+                                                            <Button
+                                                                color="primary"
+                                                                onClick={() =>
+                                                                    handleAcceptOrRejectFriendRequest(
+                                                                        friendRequest.friendId,
+                                                                        STATUS.ACCEPTED
+                                                                    )
+                                                                }
+                                                            >
+                                                                Accept
+                                                            </Button>
+                                                            <Button
+                                                                color="secondary"
+                                                                onClick={() =>
+                                                                    handleAcceptOrRejectFriendRequest(
+                                                                        friendRequest.friendId,
+                                                                        STATUS.REJECTED
+                                                                    )
+                                                                }
+                                                            >
+                                                                Reject
+                                                            </Button>
+                                                        </ButtonGroup>
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         );
@@ -294,24 +312,14 @@ const Users = () => {
                             flexDirection: "column",
                             alignItems: "center",
                             justifyContent: "center",
-
                         }}>
                             <Animation animation={noRequests} />
                             <Typography variant="body1">You have no friend requests.</Typography>
                         </Box>
                     )}
-                    {/* {myRequests.length !== 0 && (
-                        <Stack spacing={2}>
-                            <Pagination
-                                count={pageMyRequests}
-                                page={pageMyRequests}
-                                onChange={(event, value) => setPageMyRequests(value)}
-                            />
-                        </Stack>
-                    )} */}
-
                 </div>
             </Grid>
+
             <Dialog open={userDetails !== null} onClose={handleUserDetailsModalClose}>
                 {userDetails && (
                     <>

@@ -1,5 +1,5 @@
-import { Box, Button, FormControl,  MenuItem, Select } from "@mui/material";
-import {  useEffect, useRef, useState } from "react";
+import { Box, Button, MenuItem, Select } from "@mui/material";
+import { Fragment, useEffect, useRef, useState } from "react";
 import Draggable from "react-draggable";
 import Peer from 'simple-peer';
 import * as process from "process";
@@ -14,7 +14,7 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
 
     const [filter, setFilter] = useState('none');
 
-    const {id: senderId} = useParams();
+    const { id: senderId } = useParams();
 
     const filters = [
         {
@@ -67,10 +67,9 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
                 userToCall: id,
                 signalData: data,
                 from: me,
-                name : me,
+                name: me,
                 callType: 'video',
-                answer: false
-            }, senderId, call.friend._id )
+            }, senderId, call.friend._id)
         })
 
         peer.on("stream", (stream) => {
@@ -96,7 +95,13 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
         })
 
         peer.on("signal", (data) => {
-            socket.emit("answerCall", { signal: data, to: call.friend.socket_id })
+            socket.emit("answerCall", {
+                signal: data,
+                to: call.friend.socket_id,
+                callSender: call.friend.username,
+                callReceiver: me,
+                callUuid: call.callEvent.uuid
+            })
         })
 
         peer.on("stream", (stream) => {
@@ -133,8 +138,8 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
             }))
             socket.emit("endCall", { to: call.caller })
         })
-    
-        if(connectionRef.current) {
+
+        if (connectionRef.current) {
             connectionRef.current.destroy();
             peer.destroy();
         }
@@ -181,39 +186,39 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
         const ctx = canvas.getContext("2d");
         canvas.width = videoElement.videoWidth;
         canvas.height = videoElement.videoHeight;
-      
+
         const drawVideoFrame = () => {
-          ctx.filter = filter;
-          ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-          requestAnimationFrame(drawVideoFrame);
+            ctx.filter = filter;
+            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            requestAnimationFrame(drawVideoFrame);
         };
-      
+
         requestAnimationFrame(drawVideoFrame);
-      
+
         const stream = canvas.captureStream();
         const audioTracks = videoElement.srcObject.getAudioTracks();
         audioTracks.forEach((track) => stream.addTrack(track));
-      
+
         return stream;
-      };
-      
+    };
 
-      const updateTransmittedVideoStream = async (newStream) => {
+
+    const updateTransmittedVideoStream = async (newStream) => {
         if (state.callAccepted && !state.callEnded) {
-          const videoTrack = newStream.getVideoTracks()[0];
-          const sender = connectionRef.current._pc.getSenders().find((sender) => sender.track.kind === "video");
-          sender.replaceTrack(videoTrack);
+            const videoTrack = newStream.getVideoTracks()[0];
+            const sender = connectionRef.current._pc.getSenders().find((sender) => sender.track.kind === "video");
+            sender.replaceTrack(videoTrack);
         }
-      };
-    
+    };
 
-      const handleChange = async (event) => {
+
+    const handleChange = async (event) => {
         setFilter(event.target.value);
         const videoElement = myVideo.current;
         const newStream = await applyVideoFilter(videoElement, event.target.value);
         updateTransmittedVideoStream(newStream);
-      };
-      
+    };
+
 
     const handleAddFilter = (filter) => {
         const _video = document.querySelector('video');
@@ -230,72 +235,76 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
             position: 'absolute',
             zIndex: '1',
             borderRadius: '10px',
-            minWidth: '30rem',
-            minHeight: '20rem',
+            minHeight: '17.3rem',
+            minWidth: '19rem',
             backgroundColor: '#000',
+            overflow: 'hidden',
             right: '10px',
             top: '10px',
         }}>
             <Box>
-                <div className="video-container">
+                <div style={{
+                    display: 'flex',
+                    gap: `${state.callAccepted && !state.callEnded ? '0.2rem' : '0'}`,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}>
                     <div className="video">
-                        {state.stream && <video playsInline muted ref={myVideo} autoPlay style={{ maxWidth: "300px" }} />}
+                        {state.stream && <video playsInline muted ref={myVideo} autoPlay style={{ maxWidth: "400px" }} />}
                     </div>
                     <div className="video">
                         {state.callAccepted && !state.callEnded ?
-                            <video playsInline ref={userVideo} autoPlay style={{ maxWidth: "300px" }} /> :
+                            <video playsInline ref={userVideo} autoPlay style={{ maxWidth: "400px" }} /> :
                             null}
                     </div>
                 </div>
             </Box>
 
-            <div className="call-button">
+            <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: '2',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '1rem',
+                padding: '0.4rem',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+            }}>
                 {state.callAccepted && !state.callEnded ? (
-                    <div>
+                    <Fragment>
                         <Button
                             sx={{
-                                padding: '0.6rem 2rem',
                                 backgroundColor: 'red',
                                 color: 'white',
-                                position: 'absolute',
-                                bottom: '10px',
-                                left: '70%',
-                                transform: 'translateX(-50%)'
+                                padding: '0.6rem 2rem',
                             }}
                             variant="contained"
                             onClick={leaveCall}>
                             End Call
                         </Button>
-                        <FormControl sx={{
-                            backgroundColor: 'white',
-                            bottom: '0',
-                        }}>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                id="demo-simple-select"
-                                value={filter}
-                                label="Filter"
-                                onChange={handleChange}
-                            >
-                                {filters.map((filter, index) => (
-                                    <MenuItem key={index} value={filter.value} onClick={() => handleAddFilter(filter.value)}>{filter.label}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    </div>
+                        <Select
+                            sx={{
+                                backgroundColor: "white",
+                              }}
+                            value={filter}
+                            label="Filter"
+                            onChange={handleChange}
+                        >
+                            {filters.map((filter, index) => (
+                                <MenuItem key={index} value={filter.value} onClick={() => handleAddFilter(filter.value)}>{filter.label}</MenuItem>
+                            ))}
+                        </Select>
+                    </Fragment>
 
                 ) : (
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-end',
-                        justifyItems: 'flex-end',
-                    }}>
+                    !isIncoming && <Fragment>
                         <Button
                             sx={{
                                 backgroundColor: 'turquoise',
                                 color: 'white',
-                                bottom: '0x',
+                                padding: '0.6rem 2rem',
                             }}
                             aria-label="call"
                             onClick={() => callUser(call.friend.socket_id)}>
@@ -306,40 +315,45 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
                             sx={{
                                 backgroundColor: 'red',
                                 color: 'white',
-                                bottom: '0',
+                                padding: '0.6rem 2rem',
                             }}
                             aria-label="call"
                             onClick={leaveCall}>
                             Close
                         </Button>
 
-                    </div>
+                    </Fragment>
 
                 )}
-                {call.friend.socket_id}
-            </div>
 
-            <div>
-                {isIncoming && !state.callAccepted ? (
-                    <div className="caller">
-                        <h1 style={{ color: '#fff' }}>{call.friend.username} is calling...</h1>
-                        <Button variant="contained" color="primary" onClick={answerCall}>
-                            Answer
-                        </Button>
-                    </div>
-                ) : null}
+                <div>
+                    {isIncoming && !state.callAccepted ? (
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                        }}>
+                            <h4 style={{ color: '#fff' }}>{call.friend.username} is calling...</h4>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                sx={{
+                                    maxWidth: '7rem'
+                                }}
+                                onClick={answerCall}>
+                                Answer
+                            </Button>
+                        </div>
+                    ) : null}
+                </div>
             </div>
 
         </Box>
     </Draggable>
 
-    //TODO sa schimb modelul de users (save o lista de friends) partial facut
-    //TODO redirectionare catre dashboard in alt fel fata de cum e acuma 
-    //TODO nu poti accesa chat u daca nu esti conectat
-    //TODO paginare lista de users
-    //TODO trimite documente/poze +  ( textarea in loc de input) aprox bine 
-    //TODO salvare in db toate apeluri facute 
-    //TODO refactorizare partea de add/approve/reject friend request
+
 }
 
 export default VideoCall;

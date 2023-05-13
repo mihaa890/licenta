@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FiUsers } from 'react-icons/fi';
 import { IoCallOutline } from 'react-icons/io5';
 import { AiOutlineUser } from 'react-icons/ai';
@@ -12,9 +12,30 @@ import Users from './users/Users';
 import Settings from './settings/Settings';
 import ChatContextProvider from './ChatContextProvider.';
 import Calls from './call/Call';
+import { useAccount } from 'wagmi';
+import { useNavigate } from 'react-router-dom';
 
 const ChatDashboard = () => {
   const [selectedTab, setSelectedTab] = React.useState('Profile');
+  const {address} = useAccount();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    (async () => {
+      try {
+          const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/address/${address}`);
+          const data = await response.json();
+          
+          if(data.existingUser){
+            navigate(`/dashboard/${data.existingUser?._id}`)
+          }else {
+            navigate(`/`)
+          }
+      } catch (error) {
+          console.error(error);
+      }
+  })()
+  }, [address]);
 
   const tabs = [
     {

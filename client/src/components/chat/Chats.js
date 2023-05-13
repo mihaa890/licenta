@@ -23,101 +23,121 @@ const Chats = () => {
                 >
                     <Box sx={{ width: '300px', backgroundColor: '#F8FAFF' }}>
                         <h3>Chats</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }} >
-                            {friends.map(friend => {
-                                return (
-                                    <Box
-                                        key={friend.username}
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            padding: '10px 10px',
-                                            borderRadius: '10px',
-                                            backgroundColor: '#F1F2F6',
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                                backgroundColor: '#E5E7EB'
-                                            }
-                                        }}
-                                        onClick={() => handleSelectChat(friend)}
+                        {friends.length === 0 ? (
+                           <Box
+                           sx={{
+                               padding: "10px",
+                               textAlign: "center",
+                               marginTop: "20px",
+                               borderRadius: "5px",
+                           }}
+                       >
+                           <span
+                               sx={{
+                                   color: "#666",
+                                   fontSize: "18px",
+                               }}
+                           >
+                               No friends yet
+                           </span>
+                       </Box>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }} >
+                                {friends.map(friend => {
+                                    return (
+                                        <Box
+                                            key={friend.username}
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                padding: '10px 10px',
+                                                borderRadius: '10px',
+                                                backgroundColor: '#F1F2F6',
+                                                cursor: 'pointer',
+                                                '&:hover': {
+                                                    backgroundColor: '#E5E7EB'
+                                                }
+                                            }}
+                                            onClick={() => handleSelectChat(friend)}
 
-                                    >
-                                        <Box sx={{
-                                            position: 'relative'
-                                        }}>
-                                            <Box
-                                                sx={{
-                                                    position: 'absolute',
-                                                    backgroundColor: friend.socket_id ? '#76D45E' : '#ccc',
-                                                    width: '10px',
-                                                    height: '10px',
-                                                    borderRadius: '50%',
-                                                    right: '15px',
-                                                    bottom: '2px',
-                                                }}
-                                            />
-                                            {friend.profilePictureHash ?
-                                                <img
-                                                    src={`https://cloudflare-ipfs.com/ipfs/${friend.profilePictureHash}`}
-                                                    alt="profile"
-                                                    style={{
-                                                        width: '50px',
-                                                        height: '50px',
-                                                        borderRadius: '50%',
-                                                        objectFit: 'cover',
-                                                        marginRight: '10px'
-                                                    }}
-                                                />
-                                                :
+                                        >
+                                            <Box sx={{
+                                                position: 'relative'
+                                            }}>
                                                 <Box
                                                     sx={{
-                                                        width: '50px',
-                                                        height: '50px',
-                                                        backgroundColor: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
+                                                        position: 'absolute',
+                                                        backgroundColor: friend.socket_id ? '#76D45E' : '#ccc',
+                                                        width: '10px',
+                                                        height: '10px',
                                                         borderRadius: '50%',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        marginRight: '10px'
+                                                        right: '15px',
+                                                        bottom: '2px',
                                                     }}
-                                                >
-                                                    <span
+                                                />
+                                                {friend.profilePictureHash ?
+                                                    <img
+                                                        src={`https://cloudflare-ipfs.com/ipfs/${friend.profilePictureHash}`}
+                                                        alt="profile"
+                                                        style={{
+                                                            width: '50px',
+                                                            height: '50px',
+                                                            borderRadius: '50%',
+                                                            objectFit: 'cover',
+                                                            marginRight: '10px'
+                                                        }}
+                                                    />
+                                                    :
+                                                    <Box
                                                         sx={{
-                                                            color: '#FFFFFF',
-                                                            fontSize: '20px'
+                                                            width: '50px',
+                                                            height: '50px',
+                                                            backgroundColor: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
+                                                            borderRadius: '50%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            marginRight: '10px'
                                                         }}
                                                     >
-                                                        {friend.username.charAt(0)}
-                                                    </span>
+                                                        <span
+                                                            sx={{
+                                                                color: '#FFFFFF',
+                                                                fontSize: '20px'
+                                                            }}
+                                                        >
+                                                            {friend.username.charAt(0)}
+                                                        </span>
 
-                                                </Box>
-                                            }
+                                                    </Box>
+                                                }
+                                            </Box>
+                                            <Box>
+                                                <h4
+                                                    sx={{
+                                                        fontSize: '16px',
+                                                        fontWeight: 'bold',
+                                                        margin: '0',
+                                                        color: '#0F172A'
+                                                    }}
+                                                >
+                                                    {friend.username}
+                                                </h4>
+                                                <p
+                                                    sx={{
+                                                        fontSize: '14px',
+                                                        margin: '0',
+                                                        color: '#A5ADBB'
+                                                    }}
+                                                >
+                                                    {friend.socket_id ? 'Online' : 'Offline'}
+                                                </p>
+                                            </Box>
                                         </Box>
-                                        <Box>
-                                            <h4
-                                                sx={{
-                                                    fontSize: '16px',
-                                                    fontWeight: 'bold',
-                                                    margin: '0',
-                                                    color: '#0F172A'
-                                                }}
-                                            >
-                                                {friend.username}
-                                            </h4>
-                                            <p
-                                                sx={{
-                                                    fontSize: '14px',
-                                                    margin: '0',
-                                                    color: '#A5ADBB'
-                                                }}
-                                            >
-                                                {friend.socket_id ? 'Online' : 'Offline'}
-                                            </p>
-                                        </Box>
-                                    </Box>
-                                )
-                            })}
-                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
                     </Box>
 
                     <Box sx={{ width: '100%', backgroundColor: '#fff' }}>

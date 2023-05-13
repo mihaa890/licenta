@@ -10,6 +10,10 @@ export const AnimationContainer = styled.div`
 #chat-no-messages{
     width: 40%
 } 
+
+#file-transfer-animation {
+    width: 40%;
+}
 `;
 
 export const ChatInput = styled.textarea`

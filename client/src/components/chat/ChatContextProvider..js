@@ -49,6 +49,7 @@ const ChatContextProvider = ({ children }) => {
                         username: data.name,
                         socket_id: data.from,
                     },
+                    callEvent: data.callEvent,
                     signal: data.signal
                 }
             }));

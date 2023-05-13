@@ -25,6 +25,38 @@ const userSchema = new mongoose.Schema({
     friends: {
         type: Array,
     },
+    friendRequestsReceived: [{ 
+        senderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'User'
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'accepted', 'rejected'],
+            default: 'pending'
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now
+        }
+    }],
+    friendRequestsSent: [{ 
+        receiverId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'User'
+        },
+        status: {
+            type : String,
+            enum: ['pending', 'accepted', 'rejected'],
+            default: 'pending'
+        },
+        timestamp: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     messages: {
         type: Array,
         items: {
@@ -60,6 +92,12 @@ const userSchema = new mongoose.Schema({
                 type: String,
                 required: true
             },
+            senderProfilePictureHash: {
+                type: String
+            },
+            receiverProfilePictureHash: {
+                type: String
+            },
             receiverId: {
                 type: mongoose.Schema.Types.ObjectId,
                 required: true,
@@ -75,7 +113,8 @@ const userSchema = new mongoose.Schema({
             },
             answer: {
                 type: Boolean,
-                required: true
+                required: true,
+                default: false
             },
             timestamp: {
                 type: Date,

@@ -12,6 +12,7 @@ const getAllFriends = async (req, res) => {
 }
 
 const approveOrReject = async (req, res) => {
+    console.log("approveOrReject")
     _approveOrReject(req, res).then(friend => res.status(200).json(friend))
         .catch(err => res.status(500).json({message: err.message}));
 }

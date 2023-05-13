@@ -1,16 +1,50 @@
-const { Friend } = require('../dto/friends');
 const { User } = require('../dto/users');
-
 
 const _getFriendRequests = async (req, res) => {
     const userId = req.params.id;
-    const friendRequests = await User.find({ friends: { $elemMatch: { friendId: userId, status: 'pending' } } })
-        .select("-password")
-        .select("-messages")
-        .select("-calls");
-    return friendRequests;
-}
+    const user = await User.findById(userId);
 
+    const requestsThatIHaveSent = [];
+    const requestsThatIHaveReceived = [];
+
+    for (let sentRequest of user.friendRequestsSent) {
+        const friend = await User.findById(sentRequest.receiverId);
+        const request = {
+            requestId: sentRequest._id,
+            friendId: sentRequest.receiverId,
+            username: friend.username,
+            address : friend.address,
+            profilePictureHash: friend.profilePictureHash,
+            location : friend.location,
+            bio: friend.bio,
+            timestamp: sentRequest.timestamp
+        };
+        console.log(friend)
+        requestsThatIHaveSent.push(request);
+    }
+
+    for (let receivedRequest of user.friendRequestsReceived) {
+        const friend = await User.findById(receivedRequest.senderId);
+        const request = {
+            requestId: receivedRequest._id,
+            friendId: receivedRequest.senderId,
+            username: friend.username,
+            address : friend.address,
+            profilePictureHash: friend.profilePictureHash,
+            location : friend.location,
+            bio: friend.bio,
+            timestamp: receivedRequest.timestamp
+        };
+        requestsThatIHaveReceived.push(request);
+    }
+
+    return {
+        requestsThatIHaveSent,
+        requestsThatIHaveReceived
+    };
+};
+
+  
 const _getAllFriends = async (req, res) => {
     const userId = req.params.id;
     const user = await User.findById(userId);
@@ -39,30 +73,48 @@ const _addFriend = async (req, res) => {
 
     const user = await User.findByIdAndUpdate(
         userId,
-        { $addToSet: { friends: { friendId, status: 'pending' } } },
+        { $addToSet: { friendRequestsSent: { receiverId: friendId, status : 'pending', timestamp: Date.now() } } },
         { new: true }
     );
 
     await User.findByIdAndUpdate(
         friendId,
-        { $addToSet: { friends: { friendId: userId, status: 'pending' } } },
+        { $addToSet: { friendRequestsReceived: { senderId: userId, status : 'pending', timestamp: Date.now() } } },
         { new: true }
     );
 
-
     return user;
-}
-
-
+};
 
 const _approveOrReject = async (req, res) => {
     const userId = req.params.id;
     const friendId = req.body.friendId;
     const status = req.body.status;
 
-    const friend = await Friend.findOneAndUpdate({ user: userId, friend: friendId }, { status });
-    return friend;
-}
+    const user = await User.findByIdAndUpdate(
+        userId,
+        { $pull: { friendRequestsReceived: { senderId: friendId } } },
+        { new: true }
+    );
+
+    await User.findByIdAndUpdate(
+        friendId,
+        { $pull: { friendRequestsSent: { receiverId: userId } } },
+        { new: true }
+    );
+
+    if (status === 'accepted') {
+        user.friends.push({ friendId, status: 'accepted' });
+        await user.save();
+
+        const friend = await User.findById(friendId);
+        friend.friends.push({ friendId: userId, status: 'accepted' });
+        await friend.save();
+    }
+
+    return user;
+};
+
 
 module.exports = {
     _getAllFriends,

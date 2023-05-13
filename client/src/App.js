@@ -5,7 +5,7 @@ import { arbitrum, mainnet, polygon } from 'wagmi/chains';
 import Header from './components/header/Header';
 import { useAccount } from 'wagmi';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const chains = [arbitrum, mainnet, polygon]
 const projectId = process.env.REACT_APP_PROJECT_ID;
@@ -19,16 +19,14 @@ const wagmiClient = createClient({
 const ethereumClient = new EthereumClient(wagmiClient, chains)
 
 function App({ children }) {
-
     const { isConnected } = useAccount();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!isConnected) {
-            navigate("/");
+        if(!isConnected) {
+            navigate("/")
         }
     }, [isConnected])
-
 
     return (
         <>
