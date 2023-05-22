@@ -1,4 +1,4 @@
-const {_getAllFriends, _addFriend, _approveOrReject, _getFriendRequests} = require('../service/friends-service.js');
+const {_getAllFriends, _addFriend, _approveOrReject, _getFriendRequests, _deleteFriend} = require('../service/friends-service.js');
 
 
 const addFriend = async (req, res) => {
@@ -22,12 +22,19 @@ const getFriendRequests = async (req, res) => {
         .catch(err => res.status(500).json({message: err.message}));
 }
 
+const deleteFriend = async (req, res) => {
+    _deleteFriend(req, res).then(friend => res.status(200).json(friend))
+        .catch(err => res.status(500).json({message: err.message}));
+}
+
+
 
 module.exports = {
     addFriend,
     getAllFriends,
     approveOrReject,
-    getFriendRequests
+    getFriendRequests,
+    deleteFriend
 }
 
 

@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
 
         const sender = await User.findOne({ socket_id: data.callSender });
         const receiver = await User.findOne({ socket_id: data.callReceiver });
-        
+
         await User.findOneAndUpdate(
             { _id: sender._id, "calls.uuid": data.callUuid },
             { $set: { "calls.$.answer": true } }
@@ -147,19 +147,79 @@ const _getAllMessages = async (req, res) => {
 
     return messages;
 }
-
-const _getAllCalls = async (req, res) => {
-    const userId = req;
-
+const _getAllCalls = async (userId, page, limit) => {
+    const pageSize = limit ? +limit : 10;
     const _user = await User.findById(userId);
     const calls = _user.calls;
 
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = page * pageSize;
 
-    return calls;
+    const count = calls.length;
+    const totalPages = Math.ceil(count / pageSize);
+    const paginatedCalls = calls.slice(startIndex, endIndex);
 
+    return {
+        calls: paginatedCalls,
+        pagination: {
+            total: count,
+            totalPages,
+            currentPage: page,
+        },
+    };
+};
+
+
+const _deleteAllMessagesByUserIdAndFriendId = async (req, res) => {
+    const userId = req.params.id;
+    const {friendId, deleteAction} = req.body;
+
+    const user = await User.findById(userId);
+    const friend = await User.findById(friendId);
+
+    const userMessages = user.messages.filter(m =>
+        (m.senderId.toString() === friendId && m.receiverId.toString() === userId) ||
+        (m.senderId.toString() === userId && m.receiverId.toString() === friendId)
+    )
+
+    const friendMessages = friend.messages.filter(m =>
+        (m.senderId.toString() === friendId && m.receiverId.toString() === userId) ||
+        (m.senderId.toString() === userId && m.receiverId.toString() === friendId)
+    )
+
+
+    if (deleteAction === 'DELETE_FOR_ME') {
+
+        userMessages.forEach(async (m) => {
+            await User.findByIdAndUpdate(userId, {
+                $pull: { messages: { _id: m._id } }
+            });
+        });
+    }
+
+    if (deleteAction === 'DELETE_FOR_EVERYONE') {
+
+        userMessages.forEach(async (m) => {
+            await User.findByIdAndUpdate(userId, {
+                $pull: { messages: { _id: m._id } }
+            }); 
+        });
+
+
+        friendMessages.forEach(async (m) => {
+            await User.findByIdAndUpdate(friendId, {
+                $pull: { messages: { _id: m._id } }
+            });
+        }
+        );
+    }
+
+    return { status: 'success', message: 'Messages deleted successfully.' };
 }
+
 
 module.exports = {
     _getAllMessages,
-    _getAllCalls
+    _getAllCalls,
+    _deleteAllMessagesByUserIdAndFriendId
 }

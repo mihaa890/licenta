@@ -1,20 +1,28 @@
-import { Box, Card, CardContent, Typography, Avatar } from "@mui/material";
+import { Box, Card, CardContent, Typography, Avatar, Pagination, Stack } from "@mui/material";
 import { Fragment, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FiPhoneOutgoing, FiPhoneIncoming, FiPhoneMissed } from 'react-icons/fi';
+import { BsCameraVideo } from 'react-icons/bs';
+import { AiFillAudio } from 'react-icons/ai'
 
 const Calls = () => {
   const { id } = useParams();
   const [calls, setCalls] = useState([]);
-  console.log(calls)
-  useEffect(() => {
-    const getAllCalls = async () => {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/calls/${id}`);
-      const data = await response.json();
-      setCalls(data);
-    };
+  const [pages, setPages] = useState();
+  const [page, setPage] = useState(1);
 
-    getAllCalls();
+  const getAllCalls = async (page, limit) => {
+    const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/calls/${id}?page=${page}&limit=${limit}`);
+    const data = await response.json();
+
+    setCalls(data.calls);
+    setPages(data.pagination.totalPages)
+    setPage(page);
+  };
+
+  useEffect(() => {
+    getAllCalls(1, 4);
+
   }, [id]);
 
   const formatDate = (timestamp) => {
@@ -69,7 +77,8 @@ const Calls = () => {
           >
             {call.answer ? "Accepted" : "Missed"}
           </Typography>
-          {/* Adaugă pictograma corespunzătoare în funcție de tipul de apel */}
+
+          {call.callType === 'video' ? <BsCameraVideo /> : <AiFillAudio />}
           {
             call.answer
               ? <Fragment>
@@ -96,6 +105,19 @@ const Calls = () => {
       ) : (
         <Typography variant="body1">No calls</Typography>
       )}
+      <Stack spacing={2} sx={{
+        marginTop: "2rem",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}>
+        {pages > 1 && <Pagination
+          count={pages}
+          page={page}
+          onChange={(event, value) => getAllCalls(value, 4)}
+        />}
+      </Stack>
+
     </Box>
   );
 };

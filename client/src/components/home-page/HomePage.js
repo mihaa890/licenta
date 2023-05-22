@@ -2,7 +2,7 @@ import { Button, ContentContainer, ContentWrapper, Description, Title, Input, Fo
 import Animation from "../reusable/Animation";
 import chat from '../../assets/animations/chat.json';
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useWalletClient } from "wagmi";
 import Modal from "../modal/Modal";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertTitle, Typography } from "@mui/material";
@@ -138,8 +138,8 @@ const HomePage = () => {
                     right: "0",
                     transform: "translateY(-50%)",
                     maxWidth: "500px"
-                }} severity="error" onClose={() => setOpenModal(false)}>
-                    <AlertTitle>Error</AlertTitle>
+                }} severity="warning" onClose={() => setOpenModal(false)}>
+                    <AlertTitle>Warning</AlertTitle>
                     <Typography>
                         Oops! You need to connect your wallet to continue.
                     </Typography>

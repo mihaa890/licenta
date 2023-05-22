@@ -5,6 +5,7 @@ import Animation from "../reusable/Animation";
 import { AnimationContainer } from "./users/Chats.style";
 import { useState } from "react";
 import ChattingWith from "./users/ChattingWith";
+import { generateRGBColor } from "../reusable/utils";
 
 const Chats = () => {
 
@@ -92,7 +93,7 @@ const Chats = () => {
                                                         sx={{
                                                             width: '50px',
                                                             height: '50px',
-                                                            backgroundColor: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`,
+                                                            backgroundColor: generateRGBColor(friend.username),
                                                             borderRadius: '50%',
                                                             display: 'flex',
                                                             alignItems: 'center',

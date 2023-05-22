@@ -24,12 +24,15 @@ import {
     Paper,
     IconButton,
     CircularProgress,
+    Alert,
+    AlertTitle,
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import noRequests from "../../../assets/animations/no-requests.json"
 import Animation from "../../reusable/Animation";
+import { defaultUserIcon } from "../../reusable/utils";
 
 const STATUS = {
     PENDING: "pending",
@@ -44,11 +47,11 @@ const Users = () => {
     const [friendRequestsReceived, setFriendRequestsReceived] = useState([]);
 
     const [loading, setLoading] = useState(false);
-    const [friendDetails, setFriendDetails] = useState(null);
     const [pageMyRequests, setPageMyRequests] = useState(1);
     const [pages, setTotalPages] = useState(1);
     const [page, setPage] = useState(1);
     const { id } = useParams();
+    const [openAlert, setOpenAlert] = useState(false);
 
 
     const handleGetAllUsers = async (page, limit) => {
@@ -68,10 +71,19 @@ const Users = () => {
         setPage(page);
     };
 
-
     const handleAddFriend = async (userId, friendId) => {
         try {
             setLoading(true);
+
+            const friend = allUsers.find((user) => user._id === friendId);
+            const isAlreadyMyFriend = friend.friends.some(friend => friend.friendId === userId)
+
+            if (isAlreadyMyFriend) {
+                setOpenAlert(true);
+                setLoading(false);
+                return;
+            }
+
             const response = await fetch(
                 `${process.env.REACT_APP_BASE_URL}/api/friends/${userId}`,
                 {
@@ -139,35 +151,6 @@ const Users = () => {
         getMyRequests();
     }, [pages, pageMyRequests]);
 
-
-    const defaultUserIcon = (user) => {
-        return (
-            <Box
-                sx={{
-                    width: "50px",
-                    height: "50px",
-                    backgroundColor: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(
-                        Math.random() * 256
-                    )}, ${Math.floor(Math.random() * 256)})`,
-                    borderRadius: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#FFFFFF",
-                }}
-            >
-                <span
-                    sx={{
-                        color: "#FFFFFF",
-                        fontSize: "20px",
-                    }}
-                >
-
-                    {user?.username.charAt(0)}
-                </span>
-            </Box>
-        );
-    };
     const handleUserDetailsModalOpen = (user) => {
         setUserDetails(user);
     };
@@ -344,6 +327,26 @@ const Users = () => {
                     </>
                 )}
             </Dialog>
+
+            {
+                openAlert && <Alert severity="warning" sx={{
+                    position: "absolute",
+                    bottom: "2px",
+                    right: "10px",
+                    width: "400px",
+                    borderRadius: "0",
+                }}
+                    onClose={() => setOpenAlert(false)}
+                >
+                    <AlertTitle>
+                        <span>Warning</span>
+                    </AlertTitle>
+                    <span>
+                        You are already friends with this user.
+                    </span>
+                </Alert>
+
+            }
         </Grid>
     );
 };

@@ -116,9 +116,31 @@ const _approveOrReject = async (req, res) => {
 };
 
 
+const _deleteFriend = async (req, res) => {
+    const userId = req.params.id;
+    const friendId = req.body.friendId;
+
+    const user = await User.findByIdAndUpdate(
+        userId,
+        { $pull: { friends: { friendId } } },
+        { new: true }
+    );
+
+    await User.findByIdAndUpdate(
+        friendId,
+        { $pull: { friends: { friendId: userId } } },
+        { new: true }
+    );
+
+    return user;
+};
+
+
+
 module.exports = {
     _getAllFriends,
     _addFriend,
     _approveOrReject,
-    _getFriendRequests
+    _getFriendRequests,
+    _deleteFriend
 }

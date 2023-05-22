@@ -1,4 +1,4 @@
-import { Box, Button, MenuItem, Select } from "@mui/material";
+import { Box, Button, FormControl, MenuItem, Select } from "@mui/material";
 import { Fragment, useEffect, useRef, useState } from "react";
 import Draggable from "react-draggable";
 import Peer from 'simple-peer';
@@ -68,11 +68,12 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
                 signalData: data,
                 from: me,
                 name: me,
-                callType: 'video',
+                callType: call.audioOnly,
             }, senderId, call.friend._id)
         })
 
         peer.on("stream", (stream) => {
+            if (!userVideo.current) return;
             userVideo.current.srcObject = stream
         })
 
@@ -105,6 +106,7 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
         })
 
         peer.on("stream", (stream) => {
+            if (!userVideo.current) return;
             userVideo.current.srcObject = stream
         })
 
@@ -164,7 +166,7 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
     ])
 
     useEffect(() => {
-        if (state.stream) {
+        if (!call.audioOnly && state.stream) {
             myVideo.current.srcObject = state.stream
         }
 
@@ -174,7 +176,7 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
     useEffect(() => {
         navigator
             .mediaDevices
-            .getUserMedia({ video: true, audio: true })
+            .getUserMedia({ video: !call.audioOnly, audio: true })
             .then((stream) => {
                 setState(prevState => ({ ...prevState, stream: stream }))
             })
@@ -242,23 +244,27 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
             right: '10px',
             top: '10px',
         }}>
-            <Box>
-                <div style={{
-                    display: 'flex',
-                    gap: `${state.callAccepted && !state.callEnded ? '0.2rem' : '0'}`,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}>
-                    <div className="video">
-                        {state.stream && <video playsInline muted ref={myVideo} autoPlay style={{ maxWidth: "400px" }} />}
+            {
+                // Pentru ca adaugi in dom <video> doar cand !call.AudioOnly, nu ai nimic sa iti stream-uie sunetul
+                // gaseste o solutie
+                !call.audioOnly && <Box>
+                    <div style={{
+                        display: 'flex',
+                        gap: `${state.callAccepted && !state.callEnded ? '0.2rem' : '0'}`,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}>
+                        <div className="video">
+                            {state.stream && <video playsInline muted ref={myVideo} autoPlay style={{ maxWidth: "400px" }} />}
+                        </div>
+                        <div className="video">
+                            {state.callAccepted && !state.callEnded ?
+                                <video playsInline ref={userVideo} autoPlay style={{ maxWidth: "400px" }} /> :
+                                null}
+                        </div>
                     </div>
-                    <div className="video">
-                        {state.callAccepted && !state.callEnded ?
-                            <video playsInline ref={userVideo} autoPlay style={{ maxWidth: "400px" }} /> :
-                            null}
-                    </div>
-                </div>
-            </Box>
+                </Box>
+            }
 
             <div style={{
                 position: 'absolute',
@@ -287,7 +293,7 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
                         <Select
                             sx={{
                                 backgroundColor: "white",
-                              }}
+                            }}
                             value={filter}
                             label="Filter"
                             onChange={handleChange}
@@ -352,8 +358,6 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
 
         </Box>
     </Draggable>
-
-
 }
 
 export default VideoCall;

@@ -24,6 +24,7 @@ const ChatContextProvider = ({ children }) => {
         outgoingVideoCall: null,
         incomingVideoCall: null,
         sounds: composedSounds
+
     });
 
     const initVideoCall = (opts) => {
@@ -50,6 +51,7 @@ const ChatContextProvider = ({ children }) => {
                         socket_id: data.from,
                     },
                     callEvent: data.callEvent,
+                    audioOnly: data.callEvent.callType,
                     signal: data.signal
                 }
             }));
@@ -72,7 +74,7 @@ const ChatContextProvider = ({ children }) => {
 
     const contextValue = {
         ...context,
-        initVideoCall,
+        initVideoCall
     }
 
     const currentCall = context.outgoingVideoCall || context.incomingVideoCall;
@@ -83,15 +85,15 @@ const ChatContextProvider = ({ children }) => {
             context.socket
             && currentCall
             && <VideoCall
-                    sounds={context.sounds}
-                    me={context.me}
-                    socket={context.socket}
-                    call={currentCall}
-                    isIncoming={isIncomingCall}
-                    signal={isIncomingCall && currentCall.signal}
-                    onClose={() => setContext((prevContext) => ({ ...prevContext, outgoingVideoCall: null, incomingVideoCall: null }))}
-                />
-          
+                sounds={context.sounds}
+                me={context.me}
+                socket={context.socket}
+                call={currentCall}
+                isIncoming={isIncomingCall}
+                signal={isIncomingCall && currentCall.signal}
+                onClose={() => setContext((prevContext) => ({ ...prevContext, outgoingVideoCall: null, incomingVideoCall: null }))}
+            />
+
         }
         {children}
     </ChatContext.Provider>
