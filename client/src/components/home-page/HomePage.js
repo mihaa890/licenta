@@ -2,7 +2,7 @@ import { Button, ContentContainer, ContentWrapper, Description, Title, Input, Fo
 import Animation from "../reusable/Animation";
 import chat from '../../assets/animations/chat.json';
 import { useEffect, useState } from "react";
-import { useAccount, useWalletClient } from "wagmi";
+import { useAccount } from "wagmi";
 import Modal from "../modal/Modal";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertTitle, Typography } from "@mui/material";
@@ -46,7 +46,7 @@ const HomePage = () => {
         try {
             setLoading(true);
             const response = await fetch(
-                `${process.env.REACT_APP_BASE_URL}/api/register`,
+                `/api/register`,
                 {
                     method: "POST",
                     headers: {
@@ -81,7 +81,7 @@ const HomePage = () => {
     useEffect(() => {
         const checkAddressExists = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/address/${address}`);
+                const response = await fetch(`/api/address/${address}`);
                 const data = await response.json();
                 setExistingUser(data);
             } catch (error) {

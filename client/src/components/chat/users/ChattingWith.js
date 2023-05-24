@@ -41,7 +41,7 @@ const ChattingWith = ({ friend }) => {
 
 
     const getChatMessages = async () => {
-        const messagesResponse = await fetch(`${process.env.REACT_APP_BASE_URL}/api/messages/${senderId}?friendId=${friend._id}`, {
+        const messagesResponse = await fetch(`/api/messages/${senderId}?friendId=${friend._id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -253,7 +253,7 @@ const ChattingWith = ({ friend }) => {
     };
 
     const handleDeleteFriend = async () => {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/friends/${senderId}`, {
+        const response = await fetch(`/api/friends/${senderId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -277,7 +277,7 @@ const ChattingWith = ({ friend }) => {
 
     const handleDeleteAction = async (deleteAction) => {
         console.log(deleteAction)
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/messages/${senderId}`, {
+        const response = await fetch(`/api/messages/${senderId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',

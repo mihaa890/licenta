@@ -27,7 +27,7 @@ const Profile = () => {
     form.append('location', user.location);
     form.append('bio', user.bio);
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/users/${id}`, {
+      const response = await fetch(`/api/users/${id}`, {
         method: 'PUT',
         body: form,
       });
@@ -63,7 +63,7 @@ const Profile = () => {
   };
 
   const getAllFriends = async () => {
-    const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/friends/${id}`);
+    const response = await fetch(`/api/friends/${id}`);
     const data = await response.json();
     dispatch(addFriend(data));
   };
@@ -71,7 +71,7 @@ const Profile = () => {
   useEffect(() => {
     const getUser = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/users/${id}`);
+        const response = await fetch(`/api/users/${id}`);
         const data = await response.json();
         setUser(data);
 

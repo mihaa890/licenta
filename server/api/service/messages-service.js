@@ -2,9 +2,9 @@ const { User } = require('../dto/users');
 const { ipfs } = require('../service/user-service');
 const { v4: uuidv4 } = require('uuid');
 
-const io = require('socket.io')({
+const io = require('socket.io')( {
     cors: {
-        origin: "http://dejawo.go.ro:3000",
+        origin: "http://localhost:3000",
         methods: ["GET", "POST"],
         credentials: true
     }

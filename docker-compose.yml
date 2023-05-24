@@ -1,27 +1,58 @@
 version: "3.8"
+
 services:
-  ws:
-    container_name: ws_server
-    restart: on-failure
-    build:
-      context: .
-      dockerfile: server/Dockerfile
+  # name is optional for our mongodb
+  local-mongo:
+    # since mongo is an offical image we can use it.
+    image: "mongo"
+
+    # the port that we want to publish for mongodb
+    ports:
+      - "27023:27017"
+
+    # our mongodb depends on volume to keep the data alive.
     volumes:
-      - ./server:/app/server
+      - data:/data/db
+    
+  peer-server:
+    image: "peerjs/peerjs-server"
+    ports:
+      - "9000:9000"
+
+  # name is optional for our backend
+  server:
+    # it looks in this folder to find Dockerfile to build an image
+    build: ./server
+    # the port that we want to publish for backend
     ports:
       - "5000:5000"
-    command: >
-      sh -c "node ."
+      - "3001:3001"
 
-  react-app:
-    container_name: react_app
-    restart: on-failure
-    build: .
-    volumes:
-      - ./src:/app/src
+    # depends_on means it will start our backend container once mongo-container is  up and running.
+    depends_on:
+      - local-mongo
+
+  # name is optional for our frontend
+  client:
+    # to build an image based on Dockerfile
+    # it looks in this folder to find Dockerfile to build an image
+    build: ./client
+
+    # the port that we want to publish for frontend
     ports:
       - "3000:3000"
-    command: >
-      sh -c "yarn start"
+    # add bind mount volume to keep have updated source code
+    volumes:
+      - ./client/src:/app/src
+    # allow interactive mode
+    stdin_open: true
+    tty: true
+
+    # it will start our frontend container once backend-container is  up and running.
     depends_on:
-      - ws
+      - server
+      - peer-server
+
+# declare the volumes name that our app is using.
+volumes:
+  data:

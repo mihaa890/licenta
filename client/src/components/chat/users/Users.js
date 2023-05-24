@@ -55,7 +55,7 @@ const Users = () => {
 
 
     const handleGetAllUsers = async (page, limit) => {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/users?page=${page}&limit=${limit}`);
+        const response = await fetch(`/api/users?page=${page}&limit=${limit}`);
         const { data: users, pagination } = await response.json();
 
         const usersWithProfilePicture = await Promise.all(
@@ -85,7 +85,7 @@ const Users = () => {
             }
 
             const response = await fetch(
-                `${process.env.REACT_APP_BASE_URL}/api/friends/${userId}`,
+                `/api/friends/${userId}`,
                 {
                     method: "POST",
                     body: JSON.stringify({ friendId }),
@@ -117,7 +117,7 @@ const Users = () => {
     const handleAcceptOrRejectFriendRequest = async (friendRequestId, status) => {
         try {
             setLoading(true);
-            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/friends/${id}`, {
+            const response = await fetch(`/api/friends/${id}`, {
                 method: "PUT",
                 body: JSON.stringify({ friendId: friendRequestId, status }),
                 headers: {
@@ -138,7 +138,7 @@ const Users = () => {
 
 
     const getMyRequests = async () => {
-        const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/friends/requests/${id}`);
+        const response = await fetch(`/api/friends/requests/${id}`);
         const data = await response.json();
         console.log(data)
 

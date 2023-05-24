@@ -14,7 +14,7 @@ const composedSounds = (() => {
 })()
 
 const ChatContext = createContext({});
-export const WS_SERVER = 'http://dejawo.go.ro:3001';
+export const WS_SERVER = "http://localhost:3001";
 
 const ChatContextProvider = ({ children }) => {
     const { id: senderId } = useParams();

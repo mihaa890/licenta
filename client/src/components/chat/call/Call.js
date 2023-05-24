@@ -12,7 +12,7 @@ const Calls = () => {
   const [page, setPage] = useState(1);
 
   const getAllCalls = async (page, limit) => {
-    const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/calls/${id}?page=${page}&limit=${limit}`);
+    const response = await fetch(`/api/calls/${id}?page=${page}&limit=${limit}`);
     const data = await response.json();
 
     setCalls(data.calls);

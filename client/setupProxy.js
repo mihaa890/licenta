@@ -4,15 +4,17 @@
 //   app.use(
 //     '/api', 
 //     createProxyMiddleware({
-//       target: 'http://dejawo.go.ro:5000',
+//       target: 'http://server:5000',
 //       changeOrigin: true,
 //     })
 //   );
 //   app.use(
-//     '/ws', 
+//     '/socket.io', 
 //     createProxyMiddleware({
-//       target: 'http://localhost:3001',
+//       target: 'http://server:3001',
 //       changeOrigin: true,
+//       ws: true
 //     })
 //   );
 // };
+

@@ -23,7 +23,7 @@ const ChatDashboard = () => {
   useEffect(() => {
     (async () => {
       try {
-          const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/address/${address}`);
+          const response = await fetch(`/api/address/${address}`);
           const data = await response.json();
           
           if(data.existingUser){
