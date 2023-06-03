@@ -103,7 +103,7 @@ const Calls = () => {
             {call.answer ? "Accepted" : "Missed"}
           </Typography>
 
-          {call.callType === 'video' ? <BsCameraVideo /> : <AiFillAudio />}
+          {call.callType ? <AiFillAudio /> : <BsCameraVideo />}
           {
             call.answer
               ? <Fragment>

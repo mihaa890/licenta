@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
 import Header from './components/header/Header';
 
-
 const App = ({ children }) => {
   const { isConnected } = useAccount();
   const navigate = useNavigate();

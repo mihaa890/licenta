@@ -40,10 +40,6 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
         {
             label: 'Contrast',
             value: 'contrast(200%)'
-        },
-        {
-            label: 'Saturate',
-            value: 'saturate(200%)'
         }
     ]
 
@@ -84,6 +80,10 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
 
         connectionRef.current = peer
 
+        if (state.callEnded) {
+            sounds.callingAudio.pause();
+            leaveCall();
+        }
     }
 
     const answerCall = () => {
@@ -148,6 +148,7 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
 
 
         onClose();
+        sounds.callingAudio.pause();
     }
 
     useEffect(() => {
@@ -156,7 +157,11 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
                 console.log('playing calling sound...')
                 sounds.callingAudio.play();
             }
-        } else {
+        } else if (state.callAccepted || state.callEnded) {
+            console.log('ending calling sound...')
+            sounds.callingAudio.pause();
+        }
+        else {
             console.log('ending calling sound...')
             sounds.callingAudio.pause();
         }
@@ -243,12 +248,9 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
             overflow: 'hidden',
             right: '10px',
             top: '10px',
-            zIndex: '9'
         }}>
             {
-                // Pentru ca adaugi in dom <video> doar cand !call.AudioOnly, nu ai nimic sa iti stream-uie sunetul
-                // gaseste o solutie
-                !call.audioOnly && <Box>
+                !call.audioOnly ? <Box>
                     <div style={{
                         display: 'flex',
                         gap: `${state.callAccepted && !state.callEnded ? '0.2rem' : '0'}`,
@@ -261,10 +263,30 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
                         <div className="video">
                             {state.callAccepted && !state.callEnded ?
                                 <video playsInline ref={userVideo} autoPlay style={{ maxWidth: "400px" }} /> :
-                                null}
+                                null
+                            }
                         </div>
                     </div>
                 </Box>
+                    :
+                    <Box>
+                        <div style={{
+                            display: 'flex',
+                            gap: `${state.callAccepted && !state.callEnded ? '0.2rem' : '0'}`,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                            <div className="video">
+                                {state.stream && <audio ref={myVideo} autoPlay style={{ maxWidth: "400px" }} />}
+                            </div>
+                            <div className="video">
+                                {state.callAccepted && !state.callEnded ?
+                                    <audio ref={userVideo} autoPlay style={{ maxWidth: "400px" }} /> :
+                                    null
+                                }
+                            </div>
+                        </div>
+                    </Box>
             }
 
             <div style={{
@@ -291,18 +313,21 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
                             onClick={leaveCall}>
                             End Call
                         </Button>
-                        <Select
-                            sx={{
-                                backgroundColor: "white",
-                            }}
-                            value={filter}
-                            label="Filter"
-                            onChange={handleChange}
-                        >
-                            {filters.map((filter, index) => (
-                                <MenuItem key={index} value={filter.value} onClick={() => handleAddFilter(filter.value)}>{filter.label}</MenuItem>
-                            ))}
-                        </Select>
+                        {
+                            !call.audioOnly && <Select
+                                sx={{
+                                    backgroundColor: "white",
+                                    color: "#000"
+                                }}
+                                value={filter}
+                                label="Filter"
+                                onChange={handleChange}
+                            >
+                                {filters.map((filter, index) => (
+                                    <MenuItem key={index} value={filter.value} onClick={() => handleAddFilter(filter.value)}>{filter.label}</MenuItem>
+                                ))}
+                            </Select>
+                        }
                     </Fragment>
 
                 ) : (
@@ -351,6 +376,17 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
                                 }}
                                 onClick={answerCall}>
                                 Answer
+                            </Button>
+
+                            <Button
+                                sx={{
+                                    backgroundColor: 'red',
+                                    maxWidth: '7rem',
+                                    color: 'white',
+                                }}
+                                variant="contained"
+                                onClick={leaveCall}>
+                                Close
                             </Button>
                         </div>
                     ) : null}
