@@ -3,7 +3,8 @@ import contract from "../../../abis/contracts/MoneyTransfer.sol/MoneyTransfer.js
 import { Alert, AlertTitle, Button, Fade, Modal, TextField } from "@mui/material";
 import { FaEthereum } from "react-icons/fa";
 import { parseEther } from "viem";
-import {  usePublicClient, useWalletClient } from "wagmi";
+import { usePublicClient, useWalletClient } from "wagmi";
+import { useChatTheme } from "../settings/ThemeProvider";
 
 
 const MoneyTransfer = ({ friendAddress }) => {
@@ -19,6 +20,8 @@ const MoneyTransfer = ({ friendAddress }) => {
     });
     const [error, setError] = useState("");
 
+    const { theme } = useChatTheme();
+
     const handleTransfer = () => {
         setOpenModal(true);
     };
@@ -32,12 +35,12 @@ const MoneyTransfer = ({ friendAddress }) => {
         setError("");
 
         try {
-            const {request } = await publicClient.simulateContract({
-                account : walletClient.data.account.address,
-                address : process.env.REACT_APP_CONTRACT_ADDRESS,
-                abi : contract.abi,
-                functionName : 'transfer',
-                args : [friendAddress],
+            const { request } = await publicClient.simulateContract({
+                account: walletClient.data.account.address,
+                address: process.env.REACT_APP_CONTRACT_ADDRESS,
+                abi: contract.abi,
+                functionName: 'transfer',
+                args: [friendAddress],
                 value: parseEther(transferValue)
             })
 
@@ -45,9 +48,9 @@ const MoneyTransfer = ({ friendAddress }) => {
 
             setOpenAlert(true);
         } catch (error) {
-            console.error("Transfer failed:", error);
+            console.error("Transfer failed:", { error });
             setAlertError({
-                message: error.reason,
+                message: error.message.substring(0, 105),
                 isShown: true,
             });
         }
@@ -66,12 +69,17 @@ const MoneyTransfer = ({ friendAddress }) => {
 
     return (
         <div>
-            <Button variant="contained" onClick={handleTransfer} sx={{ textTransform: 'capitalize' }}>
+            <Button variant="contained" onClick={handleTransfer} sx={{
+                textTransform: 'capitalize',
+                color: theme.palette.mode === 'dark' ? '#e4e8ec' : '#fff',
+                backgroundColor: theme.palette.mode === 'dark' ? '#7289da' : theme.palette.primary.main,
+
+            }}>
                 Transfer
             </Button>
 
             <Modal open={openModal} onClose={() => setOpenModal(false)}>
-                <div style={{ margin: "auto", marginTop: 200, width: 400, padding: 20, backgroundColor: "white" }}>
+                <div style={{ margin: "auto", marginTop: 200, width: 400, padding: 20, backgroundColor: theme.palette.mode === 'dark' ? '#4b4b4b' : theme.palette.background.paper }}>
                     <TextField
                         label="Transfer Amount"
                         placeholder="Enter amount to transfer in ETH"
@@ -94,8 +102,7 @@ const MoneyTransfer = ({ friendAddress }) => {
                         right: '10px',
                         margin: 'auto',
                         width: '700px',
-                        zIndex: 1000
-
+                        zIndex: 1000,
                     }}
                         onClose={() => setOpenAlert(false)}>
                         <AlertTitle>
@@ -121,8 +128,7 @@ const MoneyTransfer = ({ friendAddress }) => {
                         right: '10px',
                         margin: 'auto',
                         width: '700px',
-                        zIndex: 1000
-
+                        zIndex: 1000,
                     }}
                         onClose={() => setAlertError({ message: "", isShown: false })}>
                         <AlertTitle>

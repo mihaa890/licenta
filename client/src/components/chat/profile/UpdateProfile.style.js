@@ -20,17 +20,29 @@ export const ProfileTitle = styled.h4`
   font-size: 28px;
   font-weight: bold;
   margin-bottom: 10px;
+  color: ${({ theme }) => theme.palette.text.primary};
+  &:focus{
+    outline: none;
+  }
 `;
 
 export const ProfileUsername = styled.input`
   width: 100%;
 
   font-size: 20px;
-  font-weight: bold;
   margin-bottom: 10px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: ${({ theme }) => theme.palette.mode === 'light' ? '1px solid #ccc' : '1px solid #494848'};
   border-radius: 4px;
+  background-color: ${({ theme }) => theme.palette.mode === 'light' ? '#fff' : '#333'};
+  color: ${({ theme }) => theme.palette.text.primary};
+  &:focus{
+    outline: none;
+  }
+  :-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px ${({ theme }) => theme.palette.mode === 'light' ? '#fff' : '#333'} inset;
+    -webkit-text-fill-color: ${({ theme }) => theme.palette.text.primary};
+  }
 `;
 
 export const ProfileLocation = styled.input`
@@ -39,8 +51,19 @@ export const ProfileLocation = styled.input`
   font-size: 16px;
   margin-bottom: 10px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: ${({ theme }) => theme.palette.mode === 'light' ? '1px solid #ccc' : '1px solid #494848'};
+  background-color: ${({ theme }) => theme.palette.mode === 'light' ? '#fff' : '#333'};
+  color: ${({ theme }) => theme.palette.text.primary};
   border-radius: 4px;
+
+  &:focus{
+    outline: none;
+  }
+
+  :-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px ${({ theme }) => theme.palette.mode === 'light' ? '#fff' : '#333'} inset;
+    -webkit-text-fill-color: ${({ theme }) => theme.palette.text.primary};
+  }
 `;
 
 export const ProfileBio = styled.textarea`
@@ -48,12 +71,21 @@ export const ProfileBio = styled.textarea`
   height: 150px;
   font-size: 16px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: ${({ theme }) => theme.palette.mode === 'light' ? '1px solid #ccc' : '1px solid #494848'};
+  background-color: ${({ theme }) => theme.palette.mode === 'light' ? '#fff' : '#333'};
+  color: ${({ theme }) => theme.palette.text.primary};
   border-radius: 4px;
 
   /* Customize the scrollbar */
   scrollbar-width: thin;
   scrollbar-color: #999 #eee;
+  &:focus{
+    outline: none;
+  }
+  :-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px ${({ theme }) => theme.palette.mode === 'light' ? '#fff' : '#333'} inset;
+    -webkit-text-fill-color: ${({ theme }) => theme.palette.text.primary};
+  }
 
   ::-webkit-scrollbar {
     width: 10px;
@@ -66,19 +98,15 @@ export const ProfileBio = styled.textarea`
   ::-webkit-scrollbar-thumb {
     background-color: #999;
     border-radius: 5px;
-    border: 2px solid #eee;
+    border: ${({ theme }) => theme.palette.mode === 'light' ? 'none' : '1px solid #494848'};
   }
 `;
-
-
 
 export const ProfileImageContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-
-  
 `;
 
 export const ProfileInputs = styled.div`
@@ -102,19 +130,9 @@ export const IconContainer = styled.div`
 
     & > label{
         font-size: 12px;
-        color: #719efa;
+        color: ${({ theme }) => theme.palette.mode === 'light' ? '#719efa' : '#fff'};
         cursor: pointer;
     }
 
 `
-
-export const UpdateButton = styled.button`
-  margin-top: 20px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  background-color: #719efa;
-  color: white;
-  cursor: pointer;
-`;
 

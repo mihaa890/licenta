@@ -1,4 +1,4 @@
-const { _createUser, _signin, _getAllUsers, _getUserById, _isAddressAlreadyRegistered, _updateUserProfile } = require('../../api/service/user-service');
+const { _createUser, _signin, _getAllUsers, _getUserById, _isAddressAlreadyRegistered, _updateUserProfile, _deleteUserById } = require('../../api/service/user-service');
 
 const register = (req, res) => {
     const { address, username, password } = req.body;
@@ -45,6 +45,14 @@ const updateUserProfile = (req, res) => {
         .catch(err => res.status(500).json({ message: err.message }));
 }
 
+const deleteUserById = (req, res) => {
+    const { id } = req.params;
+    _deleteUserById(id)
+        .then(user => res.status(200).json(user))
+        .catch(err => res.status(500).json({ message: err.message }));
+}
+
+
 
 module.exports = {
     register,
@@ -52,5 +60,6 @@ module.exports = {
     getUsers,
     getUserBy,
     isAddressAlreadyRegistered,
-    updateUserProfile
+    updateUserProfile,
+    deleteUserById
 }

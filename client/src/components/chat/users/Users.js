@@ -33,6 +33,7 @@ import Stack from "@mui/material/Stack";
 import noRequests from "../../../assets/animations/no-requests.json"
 import Animation from "../../reusable/Animation";
 import { defaultUserIcon } from "../../reusable/utils";
+import { useChatTheme } from "../settings/ThemeProvider";
 
 const STATUS = {
     PENDING: "pending",
@@ -52,6 +53,7 @@ const Users = () => {
     const [page, setPage] = useState(1);
     const { id } = useParams();
     const [openAlert, setOpenAlert] = useState(false);
+    const { theme } = useChatTheme();
 
 
     const handleGetAllUsers = async (page, limit) => {
@@ -162,7 +164,9 @@ const Users = () => {
     return (
         <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-                <Typography variant="h6">All Users</Typography>
+                <Typography variant="h6" sx={{
+                    color: theme.palette.mode === "dark" ? "#d4d4d4" : "#000"
+                }}>All Users</Typography>
                 <div>
                     {allUsers.length > 0 ? (
                         <List>
@@ -178,11 +182,13 @@ const Users = () => {
                                                     }}
                                                         src={user.profilePicture} />
                                                 ) : (
-                                                    defaultUserIcon(user)
+                                                    defaultUserIcon(user, theme)
                                                 )}
                                             </IconButton>
                                         </ListItemAvatar>
-                                        <ListItemText primary={user.username} />
+                                        <ListItemText primary={user.username} sx={{
+                                            color: theme.palette.mode === "dark" ? "#d4d4d4" : "#000"
+                                        }} />
                                         <Button
                                             disabled={user._id === id}
                                             variant="contained"
@@ -204,10 +210,16 @@ const Users = () => {
                             })}
                         </List>
                     ) : (
-                        <Typography variant="body1">There are no users to display.</Typography>
+                        <Typography variant="body1" sx={{
+                            color: theme.palette.mode === "dark" ? "#d4d4d4" : "#000"
+                        }}>There are no users to display.</Typography>
                     )}
                     <Stack spacing={2}>
                         {pages > 1 && <Pagination
+                            sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                            }}
                             count={pages}
                             page={page}
                             onChange={(event, value) => handleGetAllUsers(value)}
@@ -216,7 +228,9 @@ const Users = () => {
                 </div>
             </Grid>
             <Grid item xs={12} md={6}>
-                <Typography variant="h6">My Friend Requests</Typography>
+                <Typography variant="h6" sx={{
+                    color: theme.palette.mode === "dark" ? "#d4d4d4" : "#000"
+                }}>My Friend Requests</Typography>
                 <div>
                     {friendRequestsReceived.length !== 0 ? (
                         <TableContainer component={Paper} sx={{
@@ -244,7 +258,7 @@ const Users = () => {
                                                                 height: "50px",
                                                             }} src={`https://cloudflare-ipfs.com/ipfs/${friendRequest.profilePictureHash}`} />
                                                         ) : (
-                                                            defaultUserIcon(friendRequest)
+                                                            defaultUserIcon(friendRequest, theme)
                                                         )}
                                                     </IconButton>
                                                     {friendRequest.username}
@@ -297,7 +311,9 @@ const Users = () => {
                             justifyContent: "center",
                         }}>
                             <Animation animation={noRequests} />
-                            <Typography variant="body1">You have no friend requests.</Typography>
+                            <Typography variant="body1" sx={{
+                                color: theme.palette.mode === "dark" ? "#d4d4d4" : "#000"
+                            }}>You have no friend requests.</Typography>
                         </Box>
                     )}
                 </div>
@@ -310,7 +326,7 @@ const Users = () => {
                         <DialogContent>
                             {userDetails.profilePictureHash
                                 ? <Avatar src={`https://cloudflare-ipfs.com/ipfs/${userDetails.profilePictureHash}`} sx={{ width: "100px", height: "100px" }} />
-                                : defaultUserIcon(userDetails)}
+                                : defaultUserIcon(userDetails, theme)}
                             <DialogContentText>
                                 <strong>Location: </strong> {userDetails.location}
                             </DialogContentText>

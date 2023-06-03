@@ -5,7 +5,7 @@ const os = require('os');
 const upload = multer({ dest: os.tmpdir() });
 
 //controllers
-const {register, login, getUsers, getUserBy, isAddressAlreadyRegistered, updateUserProfile} = require('../controller/users-controller');
+const {register, login, getUsers, getUserBy, isAddressAlreadyRegistered, updateUserProfile, deleteUserById} = require('../controller/users-controller');
 const {getAllFriends, addFriend, approveOrReject, getFriendRequests, deleteFriend} = require('../controller/friends-controller');
 const {getAllMessages, getAllCalls, deleteAllMessagesByUserIdAndFriendId} = require('../controller/messages-controller');
 
@@ -17,6 +17,7 @@ router.post('/login', login);
 router.get('/users', getUsers);
 router.get('/users/:id', getUserBy);
 router.put('/users/:id', upload.single('file'), updateUserProfile)
+router.delete('/users/:id', deleteUserById);
 
 
 //friends routes

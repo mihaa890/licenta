@@ -14,7 +14,6 @@ const composedSounds = (() => {
 })()
 
 const ChatContext = createContext({});
-export const WS_SERVER = "http://localhost:3001";
 
 const ChatContextProvider = ({ children }) => {
     const { id: senderId } = useParams();
@@ -35,7 +34,7 @@ const ChatContextProvider = ({ children }) => {
     }
 
     useEffect(() => {
-        const socket = io(WS_SERVER);
+        const socket = io('/');
 
         socket.on("me", (id) => {
             console.log("set my id", id)

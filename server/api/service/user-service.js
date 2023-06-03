@@ -137,10 +137,16 @@ const _isAddressAlreadyRegistered = async (address) => {
 }
 
 
+const _deleteUserById = async (id) => {
+    return await User.findByIdAndDelete(id);
+}
+
 const __isUsernameTaken = async (username) => {
     const existingUser = await User.findOne({ username });
     return !!existingUser;
 }
+
+
 
 
 
@@ -151,5 +157,6 @@ module.exports = {
     _getUserById,
     _isAddressAlreadyRegistered,
     _updateUserProfile,
+    _deleteUserById,
     ipfs
 }

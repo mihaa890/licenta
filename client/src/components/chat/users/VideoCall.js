@@ -243,6 +243,7 @@ const VideoCall = ({ sounds, me, socket, call, isIncoming, onClose }) => {
             overflow: 'hidden',
             right: '10px',
             top: '10px',
+            zIndex: '9'
         }}>
             {
                 // Pentru ca adaugi in dom <video> doar cand !call.AudioOnly, nu ai nimic sa iti stream-uie sunetul

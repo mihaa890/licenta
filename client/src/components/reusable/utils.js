@@ -1,6 +1,8 @@
 import { Box } from "@mui/material";
 
+
 export const generateRGBColor = (seed) => {
+
     var numericSeed = 0;
     for (var i = 0; i < seed.length; i++) {
         numericSeed += seed.charCodeAt(i);
@@ -19,7 +21,7 @@ export const generateRGBColor = (seed) => {
 }
 
 
-export const defaultUserIcon = (user) => {
+export const defaultUserIcon = (user, theme) => {
     return (
         <Box
             sx={{
@@ -30,7 +32,7 @@ export const defaultUserIcon = (user) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#000",
+                color: theme.palette.text.primary,
             }}
         >
             <span

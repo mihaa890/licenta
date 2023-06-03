@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.3"
 
 services:
   # name is optional for our mongodb
@@ -8,16 +8,22 @@ services:
 
     # the port that we want to publish for mongodb
     ports:
-      - "27023:27017"
+      - "27017:27017"
 
     # our mongodb depends on volume to keep the data alive.
     volumes:
       - data:/data/db
+
+    networks:
+      - chat-network
     
   peer-server:
     image: "peerjs/peerjs-server"
     ports:
       - "9000:9000"
+
+    networks:
+      - chat-network
 
   # name is optional for our backend
   server:
@@ -32,15 +38,22 @@ services:
     depends_on:
       - local-mongo
 
+    networks:
+      - chat-network
+
   # name is optional for our frontend
   client:
     # to build an image based on Dockerfile
     # it looks in this folder to find Dockerfile to build an image
     build: ./client
 
+    links:
+      - server
+
     # the port that we want to publish for frontend
     ports:
-      - "3000:3000"
+      - "3002:3002"
+
     # add bind mount volume to keep have updated source code
     volumes:
       - ./client/src:/app/src
@@ -53,6 +66,13 @@ services:
       - server
       - peer-server
 
+    networks:
+      - chat-network
+
 # declare the volumes name that our app is using.
 volumes:
   data:
+
+networks:
+  chat-network:
+    driver: bridge

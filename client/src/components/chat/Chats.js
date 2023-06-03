@@ -6,11 +6,13 @@ import { AnimationContainer } from "./users/Chats.style";
 import { useState } from "react";
 import ChattingWith from "./users/ChattingWith";
 import { generateRGBColor } from "../reusable/utils";
+import { useChatTheme } from "./settings/ThemeProvider";
 
 const Chats = () => {
 
     const friends = useSelector(state => state.friends);
     const [selectedChat, setSelectedChat] = useState(null);
+    const { theme } = useChatTheme();
 
     const handleSelectChat = (friend) => {
         setSelectedChat(friend);
@@ -22,26 +24,31 @@ const Chats = () => {
                     direction={{ xs: 'row', sm: 'row' }}
                     spacing={{ xs: 1, sm: 1, md: 2 }}
                 >
-                    <Box sx={{ width: '300px', backgroundColor: '#F8FAFF' }}>
-                        <h3>Chats</h3>
+                    <Box sx={{
+                        width: '300px',
+                        backgroundColor: theme.palette.mode === 'light' ? '#F8FAFF' : '#000',
+                    }}>
+                        <h3 style={{
+                            color: theme.palette.text.primary,
+                        }}>Chats</h3>
                         {friends.length === 0 ? (
-                           <Box
-                           sx={{
-                               padding: "10px",
-                               textAlign: "center",
-                               marginTop: "20px",
-                               borderRadius: "5px",
-                           }}
-                       >
-                           <span
-                               sx={{
-                                   color: "#666",
-                                   fontSize: "18px",
-                               }}
-                           >
-                               No friends yet
-                           </span>
-                       </Box>
+                            <Box
+                                sx={{
+                                    padding: "10px",
+                                    textAlign: "center",
+                                    marginTop: "20px",
+                                    borderRadius: "5px",
+                                }}
+                            >
+                                <span
+                                    style={{
+                                        color: theme.palette.text.primary,
+                                        fontSize: "15px",
+                                    }}
+                                >
+                                    No friends yet
+                                </span>
+                            </Box>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }} >
                                 {friends.map(friend => {
@@ -53,10 +60,10 @@ const Chats = () => {
                                                 alignItems: 'center',
                                                 padding: '10px 10px',
                                                 borderRadius: '10px',
-                                                backgroundColor: '#F1F2F6',
+                                                backgroundColor: theme.palette.mode === 'light' ? '#F8FAFF' : '#000',
                                                 cursor: 'pointer',
                                                 '&:hover': {
-                                                    backgroundColor: '#E5E7EB'
+                                                    backgroundColor: theme.palette.mode === 'light' ? '#E8F0FE' : '#111',
                                                 }
                                             }}
                                             onClick={() => handleSelectChat(friend)}
@@ -102,8 +109,8 @@ const Chats = () => {
                                                         }}
                                                     >
                                                         <span
-                                                            sx={{
-                                                                color: '#FFFFFF',
+                                                            style={{
+                                                                color: '#fff',
                                                                 fontSize: '20px'
                                                             }}
                                                         >
@@ -115,20 +122,20 @@ const Chats = () => {
                                             </Box>
                                             <Box>
                                                 <h4
-                                                    sx={{
+                                                    style={{
                                                         fontSize: '16px',
                                                         fontWeight: 'bold',
                                                         margin: '0',
-                                                        color: '#0F172A'
+                                                        color: theme.palette.mode === 'light' ? '#000' : '#d4d4d4'
                                                     }}
                                                 >
                                                     {friend.username}
                                                 </h4>
                                                 <p
-                                                    sx={{
+                                                    style={{
                                                         fontSize: '14px',
                                                         margin: '0',
-                                                        color: '#A5ADBB'
+                                                        color: theme.palette.mode === 'light' ? '#000' : '#d4d4d4'
                                                     }}
                                                 >
                                                     {friend.socket_id ? 'Online' : 'Offline'}
@@ -141,13 +148,15 @@ const Chats = () => {
                         )}
                     </Box>
 
-                    <Box sx={{ width: '100%', backgroundColor: '#fff' }}>
+                    <Box sx={{ width: '100%', backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#121212'}}>
                         {selectedChat ?
                             <ChattingWith friend={selectedChat} />
                             :
                             <AnimationContainer>
                                 <Animation animation={chatNoData} id="chat-no-messages" />
-                                <span>
+                                <span style={{
+                                    color: theme.palette.text.primary,
+                                }}>
                                     Select a chat to start messaging
                                 </span>
                             </AnimationContainer>

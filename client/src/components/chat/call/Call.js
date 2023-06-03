@@ -4,12 +4,15 @@ import { useParams } from "react-router-dom";
 import { FiPhoneOutgoing, FiPhoneIncoming, FiPhoneMissed } from 'react-icons/fi';
 import { BsCameraVideo } from 'react-icons/bs';
 import { AiFillAudio } from 'react-icons/ai'
+import { useChatTheme } from "../settings/ThemeProvider";
+
 
 const Calls = () => {
   const { id } = useParams();
   const [calls, setCalls] = useState([]);
   const [pages, setPages] = useState();
   const [page, setPage] = useState(1);
+  const { theme } = useChatTheme();
 
   const getAllCalls = async (page, limit) => {
     const response = await fetch(`/api/calls/${id}?page=${page}&limit=${limit}`);
@@ -35,7 +38,13 @@ const Calls = () => {
       key={`${call.senderUsername}-${call.timestamp}`}
       sx={{
         marginBottom: "16px",
-        backgroundColor: call.answer ? "white" : "#FFEBEE",
+        backgroundColor: call.answer && theme.palette.mode === 'dark'
+          ? "rgba(0, 0, 0, 0.04)"
+          : !call.answer && theme.palette.mode === 'dark'
+            ? "#7d2525"
+            : call.answer && theme.palette.mode === 'light'
+              ? "rgba(0, 0, 0, 0.04)"
+              : "#FFEBEE",
         borderColor: call.answer ? "rgba(0, 0, 0, 0.12)" : "#E57373",
       }}
     >
@@ -67,13 +76,29 @@ const Calls = () => {
         >
           <Typography
             variant="body2"
-            sx={{ color: call.answer ? "rgba(0, 0, 0, 0.6)" : "#F44336" }}
+            sx={{
+              color: call.answer && theme.palette.mode === 'dark'
+                ? '#d4d4d4'
+                : !call.answer && theme.palette.mode === 'dark'
+                  ? 'd4d4d4'
+                  : '#000000'
+
+            }}
           >
             {call.senderUsername} called {call.receiverUsername}
           </Typography>
           <Typography
             variant="body2"
-            sx={{ color: call.answer ? "rgba(0, 0, 0, 0.6)" : "#F44336" }}
+            sx={{
+              color: call.answer && theme.palette.mode === 'dark'
+                ? '#d4d4d4'
+                : !call.answer && theme.palette.mode === 'dark'
+                  ? 'red'
+                  : !call.answer && theme.palette.mode === 'light'
+                    ? 'red'
+                    : '#000000'
+
+            }}
           >
             {call.answer ? "Accepted" : "Missed"}
           </Typography>
@@ -99,11 +124,15 @@ const Calls = () => {
 
   return (
     <Box>
-      <Typography variant="h5">Calls</Typography>
+      <Typography variant="h5" sx={{
+        color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000000',
+      }}>Calls</Typography>
       {callsElements.length > 0 ? (
         callsElements
       ) : (
-        <Typography variant="body1">No calls</Typography>
+        <Typography variant="body1" sx={{
+          color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000000',
+        }}>No calls</Typography>
       )}
       <Stack spacing={2} sx={{
         marginTop: "2rem",
@@ -112,6 +141,10 @@ const Calls = () => {
         alignItems: "center",
       }}>
         {pages > 1 && <Pagination
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+          }}
           count={pages}
           page={page}
           onChange={(event, value) => getAllCalls(value, 4)}

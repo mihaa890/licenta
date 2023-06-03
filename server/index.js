@@ -1,5 +1,6 @@
 const express = require('express');
-require('dotenv').config();
+const dotenv = require("dotenv")
+dotenv.config()
 const mongoose = require('mongoose');
 const cors = require('cors');
 
@@ -15,7 +16,7 @@ app.use(
 
 app.use(cors());
 
-mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`, { useNewUrlParser: true, useUnifiedTopology: true, directConnection: true })
   .then(() => console.log('Connected!'));
 
 app.use('/api', require('./api/routes/routes.js'));

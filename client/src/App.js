@@ -1,24 +1,25 @@
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useAccount } from 'wagmi'
+import { useAccount } from 'wagmi';
 import Header from './components/header/Header';
 
-function App({ children }) {
-    const { isConnected } = useAccount();
-    const navigate = useNavigate();
 
-    useEffect(() => {
-        if (!isConnected) {
-            navigate("/")
-        }
-    }, [isConnected])
+const App = ({ children }) => {
+  const { isConnected } = useAccount();
+  const navigate = useNavigate();
 
-    return (
-        <>
-            <Header />
-            {children}
-        </>
-    )
-}
+  useEffect(() => {
+    if (!isConnected) {
+      navigate('/');
+    }
+  }, [isConnected, navigate]);
+
+  return (
+    <div>
+      <Header />
+      {children}
+    </div>
+  );
+};
 
 export default App;

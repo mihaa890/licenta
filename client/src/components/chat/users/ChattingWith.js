@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, useRef } from 'react';
+import React, { Fragment, useContext, useMemo, useRef } from 'react';
 import { Avatar, Box, Button, Divider, Fab, IconButton, Menu, MenuItem, Modal, Typography } from '@mui/material';
 import { IoCallOutline } from 'react-icons/io5'
 import { BsCameraVideo } from 'react-icons/bs'
@@ -17,6 +17,7 @@ import fileTransferAnimation from "../../../assets/animations/file-transfer.json
 import Animation from "../../reusable/Animation";
 import MoneyTransfer from './MoneyTransfer';
 import { defaultUserIcon, generateRGBColor } from '../../reusable/utils';
+import { useChatTheme } from '../settings/ThemeProvider';
 
 
 const ChattingWith = ({ friend }) => {
@@ -37,7 +38,7 @@ const ChattingWith = ({ friend }) => {
     const [loading, setLoading] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
-
+    const { theme } = useChatTheme();
 
 
     const getChatMessages = async () => {
@@ -305,9 +306,10 @@ const ChattingWith = ({ friend }) => {
             ? <AnimationContainer><Animation animation={fileTransferAnimation} id={'file-transfer-animation'} /></AnimationContainer>
             : <Box sx={{
                 display: 'flex',
-                border: '1px solid #ccc',
+                border: theme.palette.mode === 'dark' ? '1px solid #4B4B4B' : '1px solid #ccc',
                 borderRadius: '10px',
-                height: 'calc(100vh - 120px)'
+                height: 'calc(100vh - 120px)',
+                
             }}>
                 <div
                     style={{
@@ -324,7 +326,7 @@ const ChattingWith = ({ friend }) => {
                             display: 'flex',
                             alignItems: 'center',
                             padding: '12px',
-                            backgroundColor: '#F8FAFF',
+                            backgroundColor: theme.palette.mode === 'dark' ? '#2A2A2A' : '#F8FAFF',
                             borderBottom: '1px solid #4B4B4B',
                         }}
                     >
@@ -350,8 +352,8 @@ const ChattingWith = ({ friend }) => {
                                 onClick={handleOpenInfo}
                             >
                                 <span
-                                    sx={{
-                                        color: '#FFFFFF',
+                                    style={{
+                                        color: '#fff',
                                         fontSize: '20px'
                                     }}
                                 >
@@ -361,11 +363,12 @@ const ChattingWith = ({ friend }) => {
                             </Box>
 
                         }
-                    
+
                         <div
                             style={{
                                 fontWeight: 'bold',
                                 fontSize: '18px',
+                                color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000',
                             }}
                         >
                             {friend.username}
@@ -420,7 +423,7 @@ const ChattingWith = ({ friend }) => {
                                 >
                                     <Box
                                         sx={{
-                                            backgroundColor: "white",
+                                            backgroundColor: theme.palette.mode === 'dark' ? '#2A2A2A' : '#fff',
                                             width: "300px",
                                             padding: "16px",
                                             display: "flex",
@@ -429,7 +432,9 @@ const ChattingWith = ({ friend }) => {
                                             gap: "1rem",
                                         }}
                                     >
-                                        <Typography variant="h6">
+                                        <Typography variant="h6" sx={{
+                                            color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000'
+                                        }}>
                                             Delete conversation ?
                                         </Typography>
 
@@ -581,6 +586,7 @@ const ChattingWith = ({ friend }) => {
                         onSubmit={handleSendMessage}
                     >
                         <ChatInput
+                            theme={theme}
                             placeholder="Type your message here"
                             value={currentMessage}
                             onChange={(e) => setCurrentMessage(e.target.value)}
@@ -602,7 +608,7 @@ const ChattingWith = ({ friend }) => {
                                 variant="extended"
                                 style={{
                                     margin: '0 5px',
-                                    backgroundColor: '#1976d2',
+                                    backgroundColor: theme.palette.mode === 'dark' ? '#7289da' : '#1976d2',
                                     color: '#fff',
                                     zIndex: 1,
                                 }}
@@ -624,7 +630,7 @@ const ChattingWith = ({ friend }) => {
                                 transform: 'translate(-50%, -50%)',
                                 width: '50%',
                                 height: '50%',
-                                backgroundColor: '#fff',
+                                backgroundColor: theme.palette.mode === 'dark' ? '#2e2e2e' : '#fff',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
@@ -634,7 +640,9 @@ const ChattingWith = ({ friend }) => {
                                 padding: '12px',
                             }}>
                                 <div id="modal-modal-title">
-                                    <h2>File Preview</h2>
+                                    <h2 style={{
+                                        color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000',
+                                    }}>File Preview</h2>
                                 </div>
                                 {fileUrl && fileUrl.type === 'image'
                                     ? <img id="modal-modal-description"
@@ -676,12 +684,15 @@ const ChattingWith = ({ friend }) => {
                                 }}>
                                     <Button
                                         type="submit"
-                                        style={{
+                                        sx={{
                                             fontWeight: 'bold',
                                             marginTop: '12px',
+                                            color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#fff',
+                                            backgroundColor: theme.palette.mode === 'dark' ? '#7289da' : '#1976d2',
+                                            textTransform: 'capitalize',
                                         }}
                                         variant="contained"
-                                        color="primary"
+                                    
                                         onClick={(e) => handleSendFile(e)}
                                     >
                                         Send File
@@ -691,10 +702,11 @@ const ChattingWith = ({ friend }) => {
                                         style={{
                                             fontWeight: 'bold',
                                             marginTop: '12px',
-                                            backgroundColor: '#ff0000',
+                                            color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000',
+                                            textTransform: 'capitalize',
                                         }}
                                         variant="contained"
-                                        color="primary"
+                                        color= "error"
                                         onClick={() => {
                                             setOpenModal(false);
                                         }}
@@ -722,10 +734,12 @@ const ChattingWith = ({ friend }) => {
                             <Box ref={emojiRef} sx={{
                                 position: 'absolute',
                                 top: '7rem',
-                                right: '1rem'
-
+                                right: '1rem',
                             }}>
-                                <EmojiPicker onEmojiClick={onClick} />
+                                <EmojiPicker onEmojiClick={onClick} theme={
+                                    theme.palette.mode
+                                }
+                                />
                             </Box>
                         </Draggable>
 
@@ -737,9 +751,10 @@ const ChattingWith = ({ friend }) => {
                             style={{
                                 fontWeight: 'bold',
                                 textTransform: 'capitalize',
+                                color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#fff',
+                                backgroundColor: theme.palette.mode === 'dark' ? '#7289da' : theme.palette.primary.main,
                             }}
                             variant="contained"
-                            color="primary"
                         >
                             Send
                         </Button>
@@ -752,12 +767,13 @@ const ChattingWith = ({ friend }) => {
 
                             width: '300px',
                             height: '100%',
-                            backgroundColor: '#f8faff',
+                            backgroundColor: theme.palette.mode === 'dark' ? '#121212' : '#f8faff',
                             boxSizing: 'border-box',
                             overflowY: 'auto',
                             zIndex: 1,
-                            borderLeft: '1px solid #ccc',
+                            borderLeft: theme.palette.mode === 'dark' ? '1px solid #555' : '1px solid #ccc',
                             transition: 'all 0.3s ease',
+                            boxShadow: theme.palette.mode === 'dark' ? '0px 0px 10px 0px #000' : '0px 0px 10px 0px #ccc',
                         }}
                     >
                         <Box sx={{
@@ -767,24 +783,28 @@ const ChattingWith = ({ friend }) => {
                             justifyContent: 'center',
                             alignItems: 'center',
                             gap: '12px',
-                            backgroundColor: '#fff',
-                            boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+                            backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f8faff',
+                            boxShadow: theme.palette.mode === 'dark' ? '0px 0px 10px 0px #000' : '0px 0px 10px 0px #ccc',
 
                         }}>
-                            <Typography variant="h6" gutterBottom>
+                            <Typography variant="h6" gutterBottom sx={{
+                                color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000',
+                            }}>
                                 User Info
                             </Typography>
                             {friend.profilePictureHash
                                 ? <Avatar sx={{ width: 100, height: 100 }} src={`https://cloudflare-ipfs.com/ipfs/${friend.profilePictureHash}`} />
-                                : defaultUserIcon(friend)
+                                : defaultUserIcon(friend, theme)
                             }
-                            <span>
+                            <span style={{
+                                color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000',
+                            }}>
                                 {friend.username}
                             </span>
 
                             <Divider sx={{
                                 width: '100%',
-                                backgroundColor: '#ccc',
+                                backgroundColor: theme.palette.mode === 'dark' ? '#555' : '#ccc',
                             }} />
                         </Box>
 
@@ -795,17 +815,20 @@ const ChattingWith = ({ friend }) => {
                             alignItems: 'flex-start',
                             gap: '12px',
                             marginTop: '12px',
-                            backgroundColor: '#fff',
                             padding: '12px',
-                            boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+                            backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f8faff',
+                            boxShadow: theme.palette.mode === 'dark' ? '0px 0px 10px 0px #000' : '0px 0px 10px 0px #ccc',
+
                         }}>
                             <span style={{
-                                color: '#6f6f6f',
+                                color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#6f6f6f',
                                 fontSize: '12px',
                             }}>
                                 About
                             </span>
-                            <Box>
+                            <Box sx={{
+                                color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000',
+                            }}>
                                 {friend.bio ? friend.bio : 'No bio'}
                             </Box>
                         </Box>
@@ -817,17 +840,20 @@ const ChattingWith = ({ friend }) => {
                             alignItems: 'flex-start',
                             gap: '12px',
                             marginTop: '12px',
-                            backgroundColor: '#fff',
+                            backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f8faff',
+                            boxShadow: theme.palette.mode === 'dark' ? '0px 0px 10px 0px #000' : '0px 0px 10px 0px #ccc',
+
                             padding: '12px',
-                            boxShadow: '0 0 10px rgba(0,0,0,0.2)',
                         }}>
                             <span style={{
-                                color: '#6f6f6f',
+                                color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#6f6f6f',
                                 fontSize: '12px',
                             }}>
                                 Location
                             </span>
-                            <Box>
+                            <Box sx={{
+                                color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000',
+                            }}>
                                 {friend.location ? friend.location : 'No location'}
                             </Box>
                         </Box>
@@ -839,24 +865,27 @@ const ChattingWith = ({ friend }) => {
                             alignItems: 'flex-start',
                             gap: '12px',
                             marginTop: '12px',
-                            backgroundColor: '#fff',
                             padding: '12px',
-                            boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+                            backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f8faff',
+                            boxShadow: theme.palette.mode === 'dark' ? '0px 0px 10px 0px #000' : '0px 0px 10px 0px #ccc',
+
                         }}>
                             <span style={{
-                                color: '#6f6f6f',
+                                color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#6f6f6f',
                                 fontSize: '12px',
                             }}>
                                 Address
                             </span>
-                            <Box>
+                            <Box sx={{
+                                color: theme.palette.mode === 'dark' ? '#d4d4d4' : '#000',
+                            }}>
                                 {friend.address.substring(0, 4) + '...' + friend.address.substring(friend.address.length - 4, friend.address.length)}
                             </Box>
                         </Box>
 
                         <Divider sx={{
                             width: '100%',
-                            backgroundColor: '#ccc',
+                            backgroundColor: theme.palette.mode === 'dark' ? '#555' : '#ccc',
                         }} />
                         <Box sx={{
                             display: 'flex',
@@ -865,7 +894,7 @@ const ChattingWith = ({ friend }) => {
                             alignItems: 'center',
                             gap: '12px',
                             marginTop: '12px',
-                            backgroundColor: '#fff',
+                            backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f8faff',
                             padding: '12px',
                             textTransform: 'capitalize',
                         }}>

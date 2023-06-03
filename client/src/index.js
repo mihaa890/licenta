@@ -13,6 +13,7 @@ import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum'
 import { Web3Modal } from '@web3modal/react'
 import { configureChains, createConfig, WagmiConfig } from 'wagmi'
 import { mainnet, localhost } from 'wagmi/chains'
+import ThemeProvider from './components/chat/settings/ThemeProvider';
 
 const chains = [mainnet, localhost]
 const projectId = process.env.REACT_APP_PROJECT_ID;
@@ -28,10 +29,9 @@ const wagmiConfig = createConfig({
 
 const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <Fragment>
+  <ThemeProvider>
     <GlobalCSS />
     <WagmiConfig config={wagmiConfig}>
 
@@ -51,9 +51,10 @@ root.render(
     <Web3Modal
       projectId={projectId}
       ethereumClient={ethereumClient}
-      themeMode='dark'
+      themeMode={'dark'}
+
     />
-  </Fragment>
+  </ThemeProvider>
 
 
 );
