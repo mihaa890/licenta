@@ -12,10 +12,10 @@ import store from './components/redux/store';
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum'
 import { Web3Modal } from '@web3modal/react'
 import { configureChains, createConfig, WagmiConfig } from 'wagmi'
-import { mainnet, localhost } from 'wagmi/chains'
+import { mainnet } from 'wagmi/chains'
 import ThemeProvider from './components/chat/settings/ThemeProvider';
 
-const chains = [mainnet, localhost]
+const chains = [mainnet]
 const projectId = process.env.REACT_APP_PROJECT_ID;
 
 const { publicClient } = configureChains(chains, [w3mProvider({ projectId })]);

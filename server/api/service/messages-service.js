@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const io = require('socket.io')( {
     cors: {
-        origin: "http://client:3002",
+        origin: "http://client:3000",
         methods: ["GET", "POST"],
         credentials: true
     }

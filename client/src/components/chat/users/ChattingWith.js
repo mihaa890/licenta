@@ -156,7 +156,8 @@ const ChattingWith = ({ friend }) => {
                             filename: file.name,
                             hash: fileHash,
                             type: fileType,
-                        }
+                        },
+                        timestamp: Date.now()
                     }
                 ]);
             }
